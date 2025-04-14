@@ -1,0 +1,395 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<SplitPane fx:id="splitPaneOutsideContainer" dividerPositions="0.3224690458849235" minHeight="550.0" minWidth="1000.0" prefHeight="600.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.windyweather.syncfiles.SyncFilesController">
+    <items>
+        <HBox>
+            <children>
+                <VBox spacing="20.0">
+                    <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                    </padding>
+                    <HBox>
+                        <children>
+
+                            <Label fx:id="welcomeText" text="Synchronize Pairs">
+                                <font>
+                                    <Font size="18.0" />
+                                </font>
+                            </Label>
+                            <Button mnemonicParsing="false" text="About...">
+                                <HBox.margin>
+                                    <Insets left="10.0" />
+                                </HBox.margin>
+                            </Button>
+                        </children>
+                    </HBox>
+                    <TableView prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                        <columns>
+                            <TableColumn maxWidth="150.0" minWidth="80.0" prefWidth="120.0" text="Path Pair" />
+                            <TableColumn maxWidth="100.0" prefWidth="69.60003662109375" text="Status" />
+                        </columns>
+                    </TableView>
+                </VBox>
+                <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0">
+                    <children>
+                        <Button mnemonicParsing="false" text="New Pair">
+                            <VBox.margin>
+                                <Insets top="90.0" />
+                            </VBox.margin>
+                        </Button>
+                        <Button layoutX="19.0" layoutY="60.0" mnemonicParsing="false" text="Open Pair">
+                            <VBox.margin>
+                                <Insets top="10.0" />
+                            </VBox.margin>
+                        </Button>
+                        <HBox alignment="TOP_CENTER">
+                            <children>
+                                <Button mnemonicParsing="false" text="^">
+                                    <HBox.margin>
+                                        <Insets />
+                                    </HBox.margin>
+                                </Button>
+                                <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" text="V">
+                                    <HBox.margin>
+                                        <Insets left="10.0" />
+                                    </HBox.margin>
+                                </Button>
+                            </children>
+                            <VBox.margin>
+                                <Insets top="10.0" />
+                            </VBox.margin>
+                        </HBox>
+                        <Button layoutX="16.0" layoutY="136.0" mnemonicParsing="false" text="Move Top">
+                            <VBox.margin>
+                                <Insets top="10.0" />
+                            </VBox.margin>
+                        </Button>
+                        <Button layoutX="16.0" layoutY="198.0" mnemonicParsing="false" text="Remove Pair">
+                            <VBox.margin>
+                                <Insets top="10.0" />
+                            </VBox.margin>
+                        </Button>
+                        <Button layoutX="19.0" layoutY="244.0" mnemonicParsing="false" text="1 -&gt; 2">
+                            <VBox.margin>
+                                <Insets top="50.0" />
+                            </VBox.margin>
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                        </Button>
+                        <Button layoutX="32.0" layoutY="320.0" mnemonicParsing="false" text="2 -&gt; 1">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                            <VBox.margin>
+                                <Insets top="10.0" />
+                            </VBox.margin>
+                        </Button>
+                        <Button layoutX="32.0" layoutY="370.0" mnemonicParsing="false" text="Save Pairs">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                            <VBox.margin>
+                                <Insets top="20.0" />
+                            </VBox.margin>
+                        </Button>
+                        <Button layoutX="20.0" layoutY="410.0" mnemonicParsing="false" text="Close">
+                            <font>
+                                <Font size="14.0" />
+                            </font>
+                            <VBox.margin>
+                                <Insets top="20.0" />
+                            </VBox.margin>
+                        </Button>
+                        <Label text="Status">
+                            <VBox.margin>
+                                <Insets top="20.0" />
+                            </VBox.margin>
+                        </Label>
+                    </children>
+                </VBox>
+            </children>
+        </HBox>
+        <VBox>
+            <children>
+                <TabPane prefHeight="350.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+                    <tabs>
+                        <Tab text="Pair Name">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                    <children>
+                                        <Label layoutX="76.0" layoutY="75.0" text="Name of Pair">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </Label>
+                                        <TextField layoutX="195.0" layoutY="70.0" prefHeight="30.0" prefWidth="301.0">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </TextField>
+                                    </children>
+                                </AnchorPane>
+                            </content>
+                        </Tab>
+                        <Tab text="File Paths">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="300.0" prefWidth="200.0">
+                                    <children>
+                                        <CheckBox layoutX="198.0" layoutY="128.0" mnemonicParsing="false" text="Exclude File Types (xxx;yyy)">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </CheckBox>
+                                        <TextField layoutX="401.0" layoutY="125.0" prefHeight="26.0" prefWidth="304.0" />
+                                        <Label layoutX="40.0" layoutY="29.0" text="File Path One">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </Label>
+                                        <Button layoutX="150.0" layoutY="24.0" mnemonicParsing="false" text="...">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </Button>
+                                        <TextField layoutX="196.0" layoutY="24.0" prefHeight="30.0" prefWidth="509.0">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </TextField>
+                                        <Label layoutX="40.0" layoutY="75.0" text="File Path Two">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </Label>
+                                        <Button layoutX="150.0" layoutY="70.0" mnemonicParsing="false" text="...">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </Button>
+                                        <TextField layoutX="198.0" layoutY="69.0" prefHeight="30.0" prefWidth="506.0">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </TextField>
+                                        <CheckBox layoutX="40.0" layoutY="128.0" mnemonicParsing="false" text="Include Subfolders">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </CheckBox>
+                                    </children>
+                                </AnchorPane>
+                            </content>
+                        </Tab>
+                        <Tab text="Copy Options">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                    <children>
+                                        <Label layoutX="272.0" layoutY="23.0" text="Copy Options">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </Label>
+                                        <CheckBox layoutX="98.0" layoutY="55.0" mnemonicParsing="false" text="Verify Copied">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </CheckBox>
+                                        <CheckBox layoutX="98.0" layoutY="88.0" mnemonicParsing="false" text="Verify Not Copied">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </CheckBox>
+                                        <CheckBox layoutX="98.0" layoutY="118.0" mnemonicParsing="false" text="Recover Verify Failure">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </CheckBox>
+                                        <CheckBox layoutX="414.0" layoutY="55.0" mnemonicParsing="false" text="Override Read-Only">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </CheckBox>
+                                    </children>
+                                </AnchorPane>
+                            </content>
+                        </Tab>
+                        <Tab text="Error Logging">
+                            <content>
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                    <children>
+                                        <Label layoutX="228.0" layoutY="22.0" text="Log all file operations to a text file">
+                                            <font>
+                                                <Font name="System Bold" size="14.0" />
+                                            </font>
+                                        </Label>
+                                        <CheckBox layoutX="55.0" layoutY="58.0" mnemonicParsing="false" text="Log Operations">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </CheckBox>
+                                        <Button layoutX="202.0" layoutY="55.0" mnemonicParsing="false" text="...">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </Button>
+                                        <TextField layoutX="251.0" layoutY="55.0" prefHeight="26.0" prefWidth="419.0" />
+                                        <CheckBox layoutX="55.0" layoutY="102.0" mnemonicParsing="false" text="Log Errors. No Message Boxes">
+                                            <font>
+                                                <Font size="14.0" />
+                                            </font>
+                                        </CheckBox>
+                                    </children>
+                                </AnchorPane>
+                            </content>
+                        </Tab>
+                    </tabs>
+                </TabPane>
+                <HBox prefWidth="200.0">
+                    <children>
+                        <Label text="Last Sync">
+                            <HBox.margin>
+                                <Insets left="20.0" />
+                            </HBox.margin>
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+                        <Label text="2025 Apr 02 11:04">
+                            <HBox.margin>
+                                <Insets left="10.0" />
+                            </HBox.margin>
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+                        <Label layoutX="30.0" layoutY="10.0" text="Total Bytes">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                            <HBox.margin>
+                                <Insets left="20.0" />
+                            </HBox.margin>
+                        </Label>
+                        <Label text="2277 MB">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                            <padding>
+                                <Insets left="10.0" />
+                            </padding>
+                        </Label>
+                        <Label layoutX="198.0" layoutY="10.0" text="Total Operations">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                            <HBox.margin>
+                                <Insets left="20.0" />
+                            </HBox.margin>
+                        </Label>
+                        <Label layoutX="259.0" layoutY="10.0" text="1187">
+                            <padding>
+                                <Insets left="10.0" />
+                            </padding>
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+                    </children>
+                    <VBox.margin>
+                        <Insets bottom="20.0" top="20.0" />
+                    </VBox.margin>
+                </HBox>
+                <TreeTableView>
+                    <columns>
+                        <TreeTableColumn maxWidth="500.0" prefWidth="400.0" text="Source File Path" />
+                        <TreeTableColumn maxWidth="200.0" minWidth="0.0" prefWidth="100.0" text="Size" />
+                        <TreeTableColumn maxWidth="200.0" prefWidth="100.0" text="Action" />
+                        <TreeTableColumn maxWidth="200.0" prefWidth="100.0" text="Status" />
+                    </columns>
+                </TreeTableView>
+                <HBox prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <ProgressBar prefWidth="300.0" progress="0.0">
+                            <HBox.margin>
+                                <Insets left="10.0" />
+                            </HBox.margin>
+                        </ProgressBar>
+                        <Label text="100% Completed">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                            <HBox.margin>
+                                <Insets left="20.0" />
+                            </HBox.margin>
+                        </Label>
+                        <Label HBox.hgrow="SOMETIMES">
+                            <HBox.margin>
+                                <Insets left="200.0" />
+                            </HBox.margin>
+                        </Label>
+                        <Button alignment="CENTER_RIGHT" mnemonicParsing="false" text="Stop">
+                            <HBox.margin>
+                                <Insets left="20.0" />
+                            </HBox.margin>
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Button>
+                    </children>
+                    <VBox.margin>
+                        <Insets top="10.0" />
+                    </VBox.margin>
+                </HBox>
+                <HBox prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <Button mnemonicParsing="false" text="Remove">
+                            <HBox.margin>
+                                <Insets left="10.0" />
+                            </HBox.margin>
+                        </Button>
+                        <Button layoutX="20.0" layoutY="10.0" mnemonicParsing="false" text="Confirm All">
+                            <HBox.margin>
+                                <Insets left="10.0" />
+                            </HBox.margin>
+                        </Button>
+                        <Button layoutX="90.0" layoutY="10.0" mnemonicParsing="false" text="Do Some">
+                            <HBox.margin>
+                                <Insets left="10.0" />
+                            </HBox.margin>
+                        </Button>
+                        <Button layoutX="166.0" layoutY="10.0" mnemonicParsing="false" text="Save Pair">
+                            <HBox.margin>
+                                <Insets left="100.0" />
+                            </HBox.margin>
+                        </Button>
+                        <Button layoutX="363.0" layoutY="10.0" mnemonicParsing="false" text="2 -&gt; 1">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                            <HBox.margin>
+                                <Insets left="100.0" />
+                            </HBox.margin>
+                        </Button>
+                        <Button layoutX="295.0" layoutY="10.0" mnemonicParsing="false" text="1 -&gt; 2">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                            <HBox.margin>
+                                <Insets left="30.0" />
+                            </HBox.margin>
+                        </Button>
+                    </children>
+                    <VBox.margin>
+                        <Insets bottom="10.0" top="10.0" />
+                    </VBox.margin>
+                </HBox>
+            </children>
+        </VBox>
+    </items>
+</SplitPane>
