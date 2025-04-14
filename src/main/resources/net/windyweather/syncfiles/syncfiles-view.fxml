@@ -16,7 +16,7 @@
                     <HBox>
                         <children>
 
-                            <Label fx:id="welcomeText" text="Synchronize Pairs">
+                            <Label text="Synchronize Pairs">
                                 <font>
                                     <Font size="18.0" />
                                 </font>
@@ -28,16 +28,16 @@
                             </Button>
                         </children>
                     </HBox>
-                    <TableView prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                    <TableView fx:id="tvPairTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn maxWidth="150.0" minWidth="80.0" prefWidth="120.0" text="Path Pair" />
-                            <TableColumn maxWidth="100.0" prefWidth="69.60003662109375" text="Status" />
+                            <TableColumn fx:id="tcPathPair" maxWidth="150.0" minWidth="80.0" prefWidth="120.0" text="Path Pair" />
+                            <TableColumn fx:id="tcPairStatus" maxWidth="100.0" prefWidth="69." text="Status" />
                         </columns>
                     </TableView>
                 </VBox>
                 <VBox alignment="TOP_CENTER" prefHeight="200.0" prefWidth="100.0">
                     <children>
-                        <Button mnemonicParsing="false" text="New Pair">
+                        <Button mnemonicParsing="false" onAction="#OnNewPair" text="New Pair">
                             <VBox.margin>
                                 <Insets top="90.0" />
                             </VBox.margin>
@@ -98,7 +98,7 @@
                                 <Insets top="20.0" />
                             </VBox.margin>
                         </Button>
-                        <Button layoutX="20.0" layoutY="410.0" mnemonicParsing="false" text="Close">
+                        <Button layoutX="20.0" layoutY="410.0" mnemonicParsing="false" onAction="#OnCloseButton" text="Close">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -223,7 +223,7 @@
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
                                     <children>
-                                        <Label layoutX="228.0" layoutY="22.0" text="Log all file operations to a text file">
+                                        <Label layoutX="55.0" layoutY="18.0" text="Global Options to Log file operations for All Pairs to a text file">
                                             <font>
                                                 <Font name="System Bold" size="14.0" />
                                             </font>
@@ -315,7 +315,7 @@
                 </TreeTableView>
                 <HBox prefHeight="100.0" prefWidth="200.0">
                     <children>
-                        <ProgressBar prefWidth="300.0" progress="0.0">
+                        <ProgressBar prefWidth="400.0" progress="0.0">
                             <HBox.margin>
                                 <Insets left="10.0" />
                             </HBox.margin>
@@ -330,7 +330,7 @@
                         </Label>
                         <Label HBox.hgrow="SOMETIMES">
                             <HBox.margin>
-                                <Insets left="200.0" />
+                                <Insets left="100.0" />
                             </HBox.margin>
                         </Label>
                         <Button alignment="CENTER_RIGHT" mnemonicParsing="false" text="Stop">
