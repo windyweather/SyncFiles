@@ -1,11 +1,14 @@
 package net.windyweather.syncfiles;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
@@ -14,10 +17,17 @@ import java.util.prefs.Preferences;
 import static net.windyweather.syncfiles.SyncFilesApp.*;
 
 public class SyncFilesController {
+
+    /*
+        Define the list that the TableView will watch
+     */
+    ObservableList<SyncFilesPair> pairObservableList = FXCollections.observableArrayList();
+
+
     public SplitPane splitPaneOutsideContainer;
-    public TableView tvPairTable;
-    public TableColumn tcPathPair;
-    public TableColumn tcPairStatus;
+    public TableView<SyncFilesPair> tvPairTable;
+    public TableColumn<SyncFilesPair, String> tcPathPair;
+    public TableColumn<SyncFilesPair, String> tcPairStatus;
     @FXML
     private Label welcomeText;
 
@@ -60,6 +70,16 @@ Put some text in the status line to say what's up
         placeholder.setText("Use New Pair then fill out\nthe pair in the Right Panel and\n"+
                 "use Save Pair.");
         tvPairTable.setPlaceholder(placeholder);
+
+
+        tcPathPair.setCellValueFactory( new PropertyValueFactory<SyncFilesPair, String>("sPairName"));
+        tcPairStatus.setCellValueFactory( new PropertyValueFactory<SyncFilesPair, String>("sPairStatus") );
+
+
+        /*
+        tcPathPair.setCellValueFactory(new PropertyValueFactory<>("sPairName"));
+        tcPairStatus.setCellValueFactory(new PropertyValueFactory<>("sPairStatus") );
+         */
 
     }
 
@@ -110,6 +130,28 @@ Put some text in the status line to say what's up
         stage.close();
     }
 
+
+    /*
+        Load the list with some pair names/status
+     */
+    private void SomeTestPairData() {
+        pairObservableList.setAll(
+                new SyncFilesPair( "1st Pair", "none"),
+                new SyncFilesPair( "2nd Pair", "none"),
+                new SyncFilesPair( "3rd Pair", "none"),
+                new SyncFilesPair( "4th Pair", "none"),
+                new SyncFilesPair( "5th Pair", "none"),
+                new SyncFilesPair( "6th Pair", "none"),
+                new SyncFilesPair( "7th Pair", "none"),
+                new SyncFilesPair( "8th Pair", "none"),
+                new SyncFilesPair( "9th Pair", "none"),
+                new SyncFilesPair( "10th Pair", "none")
+        );
+    }
+
+
     public void OnNewPair(ActionEvent actionEvent) {
+        printSysOut("OnNewPair");
+        SomeTestPairData();
     }
 }
