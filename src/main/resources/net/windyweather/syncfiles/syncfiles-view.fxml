@@ -21,7 +21,7 @@
                                     <Font size="18.0" />
                                 </font>
                             </Label>
-                            <Button mnemonicParsing="false" text="About...">
+                            <Button mnemonicParsing="false" onAction="#OnAboutApp" text="About...">
                                 <HBox.margin>
                                     <Insets left="10.0" />
                                 </HBox.margin>
@@ -30,8 +30,8 @@
                     </HBox>
                     <TableView fx:id="tvPairTable" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
                         <columns>
-                            <TableColumn fx:id="tcPathPair" maxWidth="150.0" minWidth="80.0" prefWidth="120.0" text="Path Pair" />
-                            <TableColumn fx:id="tcPairStatus" maxWidth="100.0" prefWidth="69." text="Status" />
+                            <TableColumn fx:id="tcPathPair" editable="false" maxWidth="150.0" minWidth="80.0" prefWidth="120.0" sortable="false" text="Path Pair" />
+                            <TableColumn fx:id="tcPairStatus" editable="false" maxWidth="100.0" prefWidth="69." sortable="false" text="Status" />
                         </columns>
                     </TableView>
                 </VBox>
@@ -42,19 +42,19 @@
                                 <Insets top="90.0" />
                             </VBox.margin>
                         </Button>
-                        <Button layoutX="19.0" layoutY="60.0" mnemonicParsing="false" text="Open Pair">
+                        <Button layoutX="19.0" layoutY="60.0" mnemonicParsing="false" onAction="#OnOpenPair" text="Open Pair">
                             <VBox.margin>
                                 <Insets top="10.0" />
                             </VBox.margin>
                         </Button>
                         <HBox alignment="TOP_CENTER">
                             <children>
-                                <Button mnemonicParsing="false" text="^">
+                                <Button mnemonicParsing="false" onAction="#OnPairMoveUp" text="^">
                                     <HBox.margin>
                                         <Insets />
                                     </HBox.margin>
                                 </Button>
-                                <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" text="V">
+                                <Button layoutX="10.0" layoutY="10.0" mnemonicParsing="false" onAction="#OnPairMoveDown" text="V">
                                     <HBox.margin>
                                         <Insets left="10.0" />
                                     </HBox.margin>
@@ -64,17 +64,17 @@
                                 <Insets top="10.0" />
                             </VBox.margin>
                         </HBox>
-                        <Button layoutX="16.0" layoutY="136.0" mnemonicParsing="false" text="Move Top">
+                        <Button layoutX="16.0" layoutY="136.0" mnemonicParsing="false" onAction="#OnPairMoveTop" text="Move Top">
                             <VBox.margin>
                                 <Insets top="10.0" />
                             </VBox.margin>
                         </Button>
-                        <Button layoutX="16.0" layoutY="198.0" mnemonicParsing="false" text="Remove Pair">
+                        <Button layoutX="16.0" layoutY="198.0" mnemonicParsing="false" onAction="#OnRemovePair" text="Remove Pair">
                             <VBox.margin>
                                 <Insets top="10.0" />
                             </VBox.margin>
                         </Button>
-                        <Button layoutX="19.0" layoutY="244.0" mnemonicParsing="false" text="1 -&gt; 2">
+                        <Button layoutX="19.0" layoutY="244.0" mnemonicParsing="false" onAction="#OnPairOneToTwo" text="1 -&gt; 2">
                             <VBox.margin>
                                 <Insets top="50.0" />
                             </VBox.margin>
@@ -82,7 +82,7 @@
                                 <Font size="14.0" />
                             </font>
                         </Button>
-                        <Button layoutX="32.0" layoutY="320.0" mnemonicParsing="false" text="2 -&gt; 1">
+                        <Button layoutX="32.0" layoutY="320.0" mnemonicParsing="false" onAction="#OnPairTwoToOne" text="2 -&gt; 1">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -90,7 +90,7 @@
                                 <Insets top="10.0" />
                             </VBox.margin>
                         </Button>
-                        <Button layoutX="32.0" layoutY="370.0" mnemonicParsing="false" text="Save Pairs">
+                        <Button layoutX="32.0" layoutY="370.0" mnemonicParsing="false" onAction="#OnSavePairs" text="Save Pairs">
                             <font>
                                 <Font size="14.0" />
                             </font>
@@ -106,7 +106,7 @@
                                 <Insets top="20.0" />
                             </VBox.margin>
                         </Button>
-                        <Label text="Status">
+                        <Label fx:id="lblStatus" text="Status" textAlignment="CENTER" wrapText="true">
                             <VBox.margin>
                                 <Insets top="20.0" />
                             </VBox.margin>
@@ -348,24 +348,24 @@
                 </HBox>
                 <HBox prefHeight="100.0" prefWidth="200.0">
                     <children>
-                        <Button mnemonicParsing="false" text="Remove">
+                        <Button mnemonicParsing="false" text="Delete Selected Source Files">
                             <HBox.margin>
                                 <Insets left="10.0" />
                             </HBox.margin>
                         </Button>
-                        <Button layoutX="20.0" layoutY="10.0" mnemonicParsing="false" text="Confirm All">
+                        <Button layoutX="20.0" layoutY="10.0" mnemonicParsing="false" text="Copy All Source">
                             <HBox.margin>
                                 <Insets left="10.0" />
                             </HBox.margin>
                         </Button>
-                        <Button layoutX="90.0" layoutY="10.0" mnemonicParsing="false" text="Do Some">
+                        <Button layoutX="90.0" layoutY="10.0" mnemonicParsing="false" text="Copy Selected Source">
                             <HBox.margin>
                                 <Insets left="10.0" />
                             </HBox.margin>
                         </Button>
-                        <Button layoutX="166.0" layoutY="10.0" mnemonicParsing="false" text="Save Pair">
+                        <Button layoutX="166.0" layoutY="10.0" mnemonicParsing="false" text=" Update Pair">
                             <HBox.margin>
-                                <Insets left="100.0" />
+                                <Insets left="10.0" />
                             </HBox.margin>
                         </Button>
                         <Button layoutX="363.0" layoutY="10.0" mnemonicParsing="false" text="2 -&gt; 1">
@@ -373,7 +373,7 @@
                                 <Font name="System Bold" size="14.0" />
                             </font>
                             <HBox.margin>
-                                <Insets left="100.0" />
+                                <Insets left="50.0" />
                             </HBox.margin>
                         </Button>
                         <Button layoutX="295.0" layoutY="10.0" mnemonicParsing="false" text="1 -&gt; 2">

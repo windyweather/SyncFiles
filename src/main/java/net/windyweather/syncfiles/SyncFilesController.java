@@ -1,26 +1,27 @@
 package net.windyweather.syncfiles;
 
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
+import java.util.Optional;
 import java.util.prefs.Preferences;
 
 import static net.windyweather.syncfiles.SyncFilesApp.*;
 
 public class SyncFilesController {
 
+    public Label lblStatus;
     /*
-        Define the list that the TableView will watch
-     */
+            Define the list that the TableView will watch
+         */
     ObservableList<SyncFilesPair> pairObservableList = FXCollections.observableArrayList();
 
 
@@ -28,12 +29,11 @@ public class SyncFilesController {
     public TableView<SyncFilesPair> tvPairTable;
     public TableColumn<SyncFilesPair, String> tcPathPair;
     public TableColumn<SyncFilesPair, String> tcPairStatus;
-    @FXML
-    private Label welcomeText;
+    //private Label welcomeText;
 
     @FXML
     protected void onHelloButtonClick() {
-        welcomeText.setText("Welcome to SyncFiles Application!");
+        //welcomeText.setText("Welcome to SyncFiles Application!");
     }
 
     /*
@@ -41,7 +41,7 @@ Put some text in the status line to say what's up
 */
     public void setStatus( String sts ) {
 
-        //txtStatus.setText( sts );
+        lblStatus.setText( sts );
     }
     //
     // Do this in one place so we can easily turn it off later
@@ -70,16 +70,28 @@ Put some text in the status line to say what's up
         placeholder.setText("Use New Pair then fill out\nthe pair in the Right Panel and\n"+
                 "use Save Pair.");
         tvPairTable.setPlaceholder(placeholder);
+        tcPairStatus.setStyle( "-fx-alignment: CENTER-RIGHT;");
+
+        printSysOut("Set up CellValueFactories for Columns");
+
+        tcPathPair.setCellValueFactory( new Callback<TableColumn.CellDataFeatures<SyncFilesPair, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call( TableColumn.CellDataFeatures<SyncFilesPair,
+                    String> p) {
+                //printSysOut("tcPathPair CellValueFactory called");
+                return p.getValue().sPairNameProperty();
+            }
+        });
 
 
-        tcPathPair.setCellValueFactory( new PropertyValueFactory<SyncFilesPair, String>("sPairName"));
-        tcPairStatus.setCellValueFactory( new PropertyValueFactory<SyncFilesPair, String>("sPairStatus") );
+        tcPairStatus.setCellValueFactory( new Callback<TableColumn.CellDataFeatures<SyncFilesPair, String>, ObservableValue<String>>() {
+            public ObservableValue<String> call( TableColumn.CellDataFeatures<SyncFilesPair,
+                    String> p) {
+                //printSysOut("tcPairStatus CellValueFactory called");
+                return p.getValue().sPairStatusProperty();
+            }
+        });
 
-
-        /*
-        tcPathPair.setCellValueFactory(new PropertyValueFactory<>("sPairName"));
-        tcPairStatus.setCellValueFactory(new PropertyValueFactory<>("sPairStatus") );
-         */
+        tvPairTable.setItems(pairObservableList);
 
     }
 
@@ -130,12 +142,23 @@ Put some text in the status line to say what's up
         stage.close();
     }
 
+    /*
+    Make sure item of interest is selected and visible
+    */
+    private void SelectAndFocusIndex( int idx ) {
+        tvPairTable.getSelectionModel().select(idx);
+        if (!tvPairTable.isVisible() ){
+            tvPairTable.getFocusModel().focus(idx);
+            tvPairTable.scrollTo( idx);
+        }
+        tvPairTable.scrollTo( idx);
+    }
 
     /*
         Load the list with some pair names/status
      */
     private void SomeTestPairData() {
-        pairObservableList.setAll(
+        pairObservableList.addAll(
                 new SyncFilesPair( "1st Pair", "none"),
                 new SyncFilesPair( "2nd Pair", "none"),
                 new SyncFilesPair( "3rd Pair", "none"),
@@ -153,5 +176,74 @@ Put some text in the status line to say what's up
     public void OnNewPair(ActionEvent actionEvent) {
         printSysOut("OnNewPair");
         SomeTestPairData();
+    }
+
+    public void OnAboutApp(ActionEvent actionEvent) {
+    }
+
+    public void OnOpenPair(ActionEvent actionEvent) {
+    }
+
+    public void OnPairMoveUp(ActionEvent actionEvent) {
+    }
+
+    public void OnPairMoveDown(ActionEvent actionEvent) {
+    }
+
+    public void OnPairMoveTop(ActionEvent actionEvent) {
+
+        int idx = tvPairTable.getSelectionModel().getSelectedIndex();
+        if ( idx == -1 ) {
+            setStatus("Select Item");
+            return;
+        }
+        if ( idx == 0 ) {
+            setStatus( "Pair already at top");
+            printSysOut("OnPairMoveTop - already at top");
+            return;
+        }
+        printSysOut(String.format("OnMovePairTop - moving idx %d to top", idx ) );
+        SyncFilesPair pair = pairObservableList.get(idx);
+        pairObservableList.remove(idx);
+        pairObservableList.addFirst(pair );
+        SelectAndFocusIndex( 0);
+        setStatus("Pair moved to top");
+    }
+
+    public void OnRemovePair(ActionEvent actionEvent) {
+
+        int idx = tvPairTable.getSelectionModel().getSelectedIndex();
+        if ( idx == -1 ) {
+            setStatus("Select Item");
+            return;
+        }
+        /*
+            Confirm the user wants to do this
+         */
+        setStatus("Confirm or Cancel");
+        Alert cnfrmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        cnfrmAlert.setTitle("Confirm Remove Pair?");
+        cnfrmAlert.setHeaderText( "Confirm Remove Pair");
+        cnfrmAlert.setContentText("Remove cannot be UnDone" );
+        Optional<ButtonType> result = cnfrmAlert.showAndWait();
+        if ( result.isEmpty() || result.get() != ButtonType.OK ) {
+            setStatus( "Remove canceled");
+            return;
+        }
+        /*
+            Remove the pair...
+         */
+        pairObservableList.remove(idx);
+
+        setStatus("Pair Removed");
+    }
+
+    public void OnPairOneToTwo(ActionEvent actionEvent) {
+    }
+
+    public void OnPairTwoToOne(ActionEvent actionEvent) {
+    }
+
+    public void OnSavePairs(ActionEvent actionEvent) {
     }
 }
