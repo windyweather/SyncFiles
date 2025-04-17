@@ -220,11 +220,21 @@ Put some text in the status line to say what's up
             if a menu item or button closed the app.
          */
         Stage stage = (Stage)splitPaneOutsideContainer.getScene().getWindow();
-        Preferences preferences = Preferences.userRoot().node(NODE_NAME);
-        preferences.putDouble(WINDOW_POSITION_X, stage.getX());
-        preferences.putDouble(WINDOW_POSITION_Y, stage.getY());
-        preferences.putDouble(WINDOW_WIDTH, stage.getWidth());
-        preferences.putDouble(WINDOW_HEIGHT, stage.getHeight());
+        /*
+            No more dirty preferences calls - Who knows where they have been.
+         */
+        if ( false ) {
+            Preferences preferences = Preferences.userRoot().node(NODE_NAME);
+            preferences.putDouble(WINDOW_POSITION_X, stage.getX());
+            preferences.putDouble(WINDOW_POSITION_Y, stage.getY());
+            preferences.putDouble(WINDOW_WIDTH, stage.getWidth());
+            preferences.putDouble(WINDOW_HEIGHT, stage.getHeight());
+        }
+
+        /*
+            Call the shiny new Window XML Save
+         */
+        WindowSaveRestore.SaveWindowPosSize( stage );
     }
 
     /*

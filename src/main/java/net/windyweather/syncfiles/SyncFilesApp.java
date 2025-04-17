@@ -54,12 +54,30 @@ public class SyncFilesApp extends Application {
         double y = pref.getDouble(WINDOW_POSITION_Y, DEFAULT_Y);
         double width = pref.getDouble(WINDOW_WIDTH, DEFAULT_WIDTH);
         double height = pref.getDouble(WINDOW_HEIGHT, DEFAULT_HEIGHT);
-        stage.setX(x);
-        stage.setY(y);
-        stage.setWidth(width);
-        stage.setHeight(height);
+        /*
+            Remove these things. We will never use Prefs again.
+            Prefs are not such a good idea since we don't know where
+            they are stored and can't manage them with something like
+            a File Explorer. We will use XML files instead.
+         */
+        pref.remove(WINDOW_POSITION_X);
+        pref.remove(WINDOW_POSITION_Y);
+        pref.remove(WINDOW_WIDTH);
+        pref.remove(WINDOW_HEIGHT);
 
-        printSysOut(String.format("App Start: Restore Window Pos/Size  [%.0f,%.0f] / [%.0f,%.0f]", x,y, width, height) );
+        if ( false ) {
+            stage.setX(x);
+            stage.setY(y);
+            stage.setWidth(width);
+            stage.setHeight(height);
+        }
+
+        /*
+            Use our fancy new XML file reader to restore the window pos/size
+         */
+        WindowSaveRestore.RestoreWindowPosSize( stage, "windyweather", "SyncFiles");
+
+        printSysOut("App Start") ;
 
     }
 
