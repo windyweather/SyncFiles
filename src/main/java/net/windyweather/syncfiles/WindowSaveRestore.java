@@ -1,5 +1,6 @@
 package net.windyweather.syncfiles;
 
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.stage.Stage;
@@ -14,46 +15,15 @@ import java.util.List;
 
 import static net.windyweather.syncfiles.SyncFilesController.printSysOut;
 
+
+/*
+    The class that does the work
+ */
 public class WindowSaveRestore {
-    static SimpleStringProperty organizationName = new SimpleStringProperty("");
-    static SimpleStringProperty userDirectory = new SimpleStringProperty("");
-    static SimpleStringProperty appName = new SimpleStringProperty("");
-    static SimpleStringProperty sXMLWindowPath = new SimpleStringProperty("");
-
-    SimpleDoubleProperty dPosX;
-    SimpleDoubleProperty dPosY;
-    SimpleDoubleProperty dSizeX;
-    SimpleDoubleProperty dSizeY;
-
-    WindowSaveRestore() {
-        dPosX = new SimpleDoubleProperty( 0);
-        dPosY = new SimpleDoubleProperty( 0);
-        dSizeX = new SimpleDoubleProperty( 0);
-        dSizeY = new SimpleDoubleProperty( 0);
-    }
-
-    public SimpleDoubleProperty dPosXProperty() { return dPosX; }
-    public SimpleDoubleProperty dPosYProperty() { return dPosY; }
-    public SimpleDoubleProperty dSizeXProperty() { return dSizeX; }
-    public SimpleDoubleProperty dSizeYProperty() { return dSizeY; }
-
-    public void setdPosX( SimpleDoubleProperty x ) {
-        this.dPosX = x;
-    }
-
-    public void setdPosY( SimpleDoubleProperty y ) {
-        this.dPosY = y;
-    }
-
-    public void setdSizeX( SimpleDoubleProperty width ) {
-        this.dSizeX = width;
-    }
-
-    public void setdSizey( SimpleDoubleProperty height ) {
-        this.dSizeY = height;
-    }
-
-
+    static public SimpleStringProperty organizationName = new SimpleStringProperty("");
+    static public SimpleStringProperty userDirectory = new SimpleStringProperty("");
+    static public SimpleStringProperty appName = new SimpleStringProperty("");
+    static public SimpleStringProperty sXMLWindowPath = new SimpleStringProperty("");
 
 
     /*
@@ -63,25 +33,28 @@ public class WindowSaveRestore {
     static void SaveWindowPosSize(Stage stage) {
         XMLEncoder encoder = null;
         /*
-            Just save ourselves, after we load up the stage [window] values
-            here. Woops. Nope Gotta make a copy since data is not static.
+            Just save WindowPosSize after we load it up from the stage
          */
-        WindowSaveRestore winThing = new WindowSaveRestore();
-        winThing.dPosX.setValue( stage.getX() );
-        winThing.dPosY.setValue( stage.getY() );
-        winThing.dSizeX.setValue( stage.getWidth() );
-        winThing.dSizeY.setValue( stage.getHeight() );
-
+        printSysOut("SaveWindowPosSize - setup WinThing");
+        WindowPosSize winThing = new WindowPosSize();
+        winThing.setdPosX( new SimpleDoubleProperty(stage.getX() ) );
+        winThing.setdPosY( new SimpleDoubleProperty(stage.getY() ) );
+        winThing.setdSizeX( new SimpleDoubleProperty(stage.getWidth() ) );
+        winThing.setdSizeY( new SimpleDoubleProperty(stage.getHeight() ) );
+        printSysOut("SaveWindowPosSize - create Encoder");
         try{
             encoder=new XMLEncoder(new BufferedOutputStream(new FileOutputStream(sXMLWindowPath.get())));
-            encoder.setPersistenceDelegate( WindowSaveRestore.class,
-                    new DefaultPersistenceDelegate( new String[]{"dPosX", "dPosY", "dSizeX", "dSizeY" } ) );
+            if ( false ) {
+                encoder.setPersistenceDelegate(WindowSaveRestore.class,
+                        new DefaultPersistenceDelegate(new String[]{"dPosX", "dPosY", "dSizeX", "dSizeY"}));
+            }
 
         }catch(Exception exception){
             printSysOut( String.format("SaveWindowPosSize: Error Creating or Opening the xml file %s", sXMLWindowPath.get() ) );
             return;
         }
-
+        //WindowPosSize[] wpsary = new WindowPosSize[] {winThing};
+        printSysOut("SaveWindowPosSize - call encoder.WriteObject");
         encoder.writeObject(winThing);
 
         printSysOut( String.format("SaveWindowPosSize: Window pos [%.0f,%.0f] to %s",
@@ -89,6 +62,9 @@ public class WindowSaveRestore {
         encoder.close();
     }
 
+     /*
+        Restore the window shape from the XML file
+      */
     static void RestoreWindowPosSize( Stage stage, String organ, String sappName ) {
         /*
             Keep these for save later.
@@ -105,21 +81,21 @@ public class WindowSaveRestore {
         try {
             printSysOut("RestoreWindowPosSize");
             final XMLDecoder decoder = new XMLDecoder(new FileInputStream(sXMLWindowPath.get()));
-            WindowSaveRestore winStuff = (WindowSaveRestore) decoder.readObject();
+            WindowPosSize winThing = (WindowPosSize) decoder.readObject();
             decoder.close();
-            printSysOut(String.format("Window Pos/Size [%.0f,%.0f] [%.0f,%.0f]", winStuff.dPosX.getValue(), winStuff.dPosY.getValue(),
-                    winStuff.dSizeX.getValue(), winStuff.dSizeY.getValue()));
+            printSysOut(String.format("Window Pos/Size [%.0f,%.0f] [%.0f,%.0f]", winThing.dPosX.getValue(), winThing.dPosY.getValue(),
+                    winThing.dSizeX.getValue(), winThing.dSizeY.getValue()));
 
             /*
                 Restore the actual window position and size
              */
-            stage.setX(winStuff.dPosX.getValue());
-            stage.setY(winStuff.dPosY.getValue());
-            stage.setWidth(winStuff.dSizeX.getValue());
-            stage.setHeight(winStuff.dSizeY.getValue());
+            stage.setX(winThing.dPosX.getValue());
+            stage.setY(winThing.dPosY.getValue());
+            stage.setWidth(winThing.dSizeX.getValue());
+            stage.setHeight(winThing.dSizeY.getValue());
 
         } catch (Exception e) {
-            printSysOut(String.format("Window Pos/Size Not Restored %s", sXMLWindowPath.get() ));
+            printSysOut(String.format("Window Pos/Size Not Restored %s e: %s", sXMLWindowPath.get(), e.toString() ));
         }
 
     }

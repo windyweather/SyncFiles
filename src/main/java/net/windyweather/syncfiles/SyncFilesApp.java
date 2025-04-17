@@ -50,10 +50,12 @@ public class SyncFilesApp extends Application {
          Pull the saved preferences and set the stage size and start location
          */
         Preferences pref = Preferences.userRoot().node(NODE_NAME);
-        double x = pref.getDouble(WINDOW_POSITION_X, DEFAULT_X);
-        double y = pref.getDouble(WINDOW_POSITION_Y, DEFAULT_Y);
-        double width = pref.getDouble(WINDOW_WIDTH, DEFAULT_WIDTH);
-        double height = pref.getDouble(WINDOW_HEIGHT, DEFAULT_HEIGHT);
+        if (false) {
+            double x = pref.getDouble(WINDOW_POSITION_X, DEFAULT_X);
+            double y = pref.getDouble(WINDOW_POSITION_Y, DEFAULT_Y);
+            double width = pref.getDouble(WINDOW_WIDTH, DEFAULT_WIDTH);
+            double height = pref.getDouble(WINDOW_HEIGHT, DEFAULT_HEIGHT);
+        }
         /*
             Remove these things. We will never use Prefs again.
             Prefs are not such a good idea since we don't know where
@@ -66,10 +68,12 @@ public class SyncFilesApp extends Application {
         pref.remove(WINDOW_HEIGHT);
 
         if ( false ) {
+            /*
             stage.setX(x);
             stage.setY(y);
             stage.setWidth(width);
             stage.setHeight(height);
+            */
         }
 
         /*
