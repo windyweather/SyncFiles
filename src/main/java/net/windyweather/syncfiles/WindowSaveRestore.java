@@ -37,10 +37,24 @@ public class WindowSaveRestore {
          */
         printSysOut("SaveWindowPosSize - setup WinThing");
         WindowPosSize winThing = new WindowPosSize();
+        /*
         winThing.setdPosX( new SimpleDoubleProperty(stage.getX() ) );
         winThing.setdPosY( new SimpleDoubleProperty(stage.getY() ) );
         winThing.setdSizeX( new SimpleDoubleProperty(stage.getWidth() ) );
         winThing.setdSizeY( new SimpleDoubleProperty(stage.getHeight() ) );
+         */
+        /*
+        winThing.dPosX = new SimpleDoubleProperty(stage.getX()  );
+        winThing.dPosY = new SimpleDoubleProperty(stage.getY()  );
+        winThing.dSizeX = new SimpleDoubleProperty(stage.getWidth() );
+        winThing.dSizeY = new SimpleDoubleProperty(stage.getHeight()  );
+        */
+
+        winThing.setDPosX( stage.getX() );
+        winThing.setDPosY( stage.getY() );
+        winThing.setDSizeX( stage.getWidth() );
+        winThing.setDSizeY( stage.getHeight() );
+
         printSysOut("SaveWindowPosSize - create Encoder");
         try{
             encoder=new XMLEncoder(new BufferedOutputStream(new FileOutputStream(sXMLWindowPath.get())));
@@ -57,8 +71,8 @@ public class WindowSaveRestore {
         printSysOut("SaveWindowPosSize - call encoder.WriteObject");
         encoder.writeObject(winThing);
 
-        printSysOut( String.format("SaveWindowPosSize: Window pos [%.0f,%.0f] to %s",
-                winThing.dPosX.get(), winThing.dPosY.get(),  sXMLWindowPath.get() ) );
+        printSysOut( String.format("SaveWindowPosSize: Window pos [%.0f,%.0f] size [to %s",
+                winThing.getDPosX(), winThing.getDPosY(),  sXMLWindowPath.get() ) );
         encoder.close();
     }
 
@@ -83,16 +97,16 @@ public class WindowSaveRestore {
             final XMLDecoder decoder = new XMLDecoder(new FileInputStream(sXMLWindowPath.get()));
             WindowPosSize winThing = (WindowPosSize) decoder.readObject();
             decoder.close();
-            printSysOut(String.format("Window Pos/Size [%.0f,%.0f] [%.0f,%.0f]", winThing.dPosX.getValue(), winThing.dPosY.getValue(),
-                    winThing.dSizeX.getValue(), winThing.dSizeY.getValue()));
+            printSysOut(String.format("Window Pos/Size [%.0f,%.0f] [%.0f,%.0f]", winThing.dPosX.get(), winThing.dPosY.get(),
+                    winThing.dSizeX.get(), winThing.dSizeY.get()));
 
             /*
                 Restore the actual window position and size
              */
-            stage.setX(winThing.dPosX.getValue());
-            stage.setY(winThing.dPosY.getValue());
-            stage.setWidth(winThing.dSizeX.getValue());
-            stage.setHeight(winThing.dSizeY.getValue());
+            stage.setX(winThing.dPosX.get());
+            stage.setY(winThing.dPosY.get());
+            stage.setWidth(winThing.dSizeX.get());
+            stage.setHeight(winThing.dSizeY.get());
 
         } catch (Exception e) {
             printSysOut(String.format("Window Pos/Size Not Restored %s e: %s", sXMLWindowPath.get(), e.toString() ));

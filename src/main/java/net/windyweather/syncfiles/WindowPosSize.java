@@ -26,41 +26,44 @@ public class WindowPosSize {
             dSizeY = new SimpleDoubleProperty(0);
         }
     }
+    /*
     public DoubleProperty dPosXProperty() { return dPosX; }
     public DoubleProperty dPosYProperty() { return dPosY; }
     public DoubleProperty dSizeXProperty() { return dSizeX; }
     public DoubleProperty dSizeYProperty() { return dSizeY; }
 
-    public double getdPosX( ) {
+     */
+
+    public double getDPosX( ) {
         return dPosX.get();
     }
 
-    public double getdPosY( ) {
+    public double getDPosY( ) {
         return dPosY.get();
     }
 
-    public double getdSizeX( ) {
+    public double getDSizeX( ) {
         return dSizeX.get();
     }
 
-    public double getdSizeY( ) {
+    public double getDSizeY( ) {
         return dSizeY.get();
     }
 
-    public void setdPosX( SimpleDoubleProperty x ) {
-        this.dPosX = x;
+    public void setDPosX( double x ) {
+        this.dPosX = new SimpleDoubleProperty(x);
     }
 
-    public void setdPosY( SimpleDoubleProperty y ) {
-        this.dPosY = y;
+    public void setDPosY( double y ) {
+        this.dPosY = new SimpleDoubleProperty(y);
     }
 
-    public void setdSizeX( SimpleDoubleProperty width ) {
-        this.dSizeX = width;
+    public void setDSizeX( double width ) {
+        this.dSizeX = new SimpleDoubleProperty(width);
     }
 
-    public void setdSizeY( SimpleDoubleProperty height ) {
-        this.dSizeY = height;
+    public void setDSizeY( double height ) {
+        this.dSizeY = new SimpleDoubleProperty(height);
     }
 
 }
