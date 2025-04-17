@@ -39,7 +39,7 @@
                     <children>
                         <Button mnemonicParsing="false" onAction="#OnNewPair" text="New Pair">
                             <VBox.margin>
-                                <Insets top="90.0" />
+                                <Insets top="70.0" />
                             </VBox.margin>
                         </Button>
                         <Button layoutX="19.0" layoutY="60.0" mnemonicParsing="false" onAction="#OnOpenPair" text="Open Pair">
@@ -64,19 +64,24 @@
                                 <Insets top="10.0" />
                             </VBox.margin>
                         </HBox>
-                        <Button layoutX="16.0" layoutY="136.0" mnemonicParsing="false" onAction="#OnPairMoveTop" text="Move Top">
+                        <Button layoutX="16.0" layoutY="136.0" mnemonicParsing="false" onAction="#OnPairMoveTop" text="Move First">
                             <VBox.margin>
                                 <Insets top="10.0" />
                             </VBox.margin>
                         </Button>
+                  <Button mnemonicParsing="false" onAction="#OnPairMoveBottom" text="Move Last">
+                     <VBox.margin>
+                        <Insets top="10.0" />
+                     </VBox.margin>
+                  </Button>
                         <Button layoutX="16.0" layoutY="198.0" mnemonicParsing="false" onAction="#OnRemovePair" text="Remove Pair">
                             <VBox.margin>
-                                <Insets top="10.0" />
+                                <Insets top="30.0" />
                             </VBox.margin>
                         </Button>
                         <Button layoutX="19.0" layoutY="244.0" mnemonicParsing="false" onAction="#OnPairOneToTwo" text="1 -&gt; 2">
                             <VBox.margin>
-                                <Insets top="50.0" />
+                                <Insets top="30.0" />
                             </VBox.margin>
                             <font>
                                 <Font size="14.0" />

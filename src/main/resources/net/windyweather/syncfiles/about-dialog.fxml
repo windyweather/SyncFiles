@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<Pane minHeight="400.0" minWidth="500.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.windyweather.syncfiles.AboutDialog">
+        <VBox alignment="TOP_CENTER">
+               <children>
+                  <Label alignment="TOP_CENTER" layoutX="10.0" layoutY="10.0" text="Sync Files" textAlignment="CENTER">
+                     <font>
+                        <Font size="20.0" />
+                     </font>
+            <padding>
+               <Insets bottom="20.0" top="20.0" />
+            </padding>
+            <VBox.margin>
+               <Insets />
+            </VBox.margin>
+                  </Label>
+                  <Label fx:id="lblSSAVersion" alignment="TOP_CENTER" text="Version: 1.0.0">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+            <padding>
+               <Insets bottom="20.0" />
+            </padding>
+                  </Label>
+         <TextArea fx:id="taAboutText" editable="false" minWidth="500.0" prefWidth="200.0" text="Place holder test replaced at runtime" wrapText="true" />
+         <Hyperlink fx:id="hlLinkToGitHub" onAction="#OnLinkToGitHub" text="https://github.com/windyweather/SyncFiles">
+            <font>
+               <Font name="System Bold" size="14.0" />
+            </font>
+         </Hyperlink>
+         <Button fx:id="btnCloseAboutDialog" mnemonicParsing="false" onAction="#OnCloseAbout" text="Close">
+            <VBox.margin>
+               <Insets top="20.0" />
+            </VBox.margin>
+         </Button>
+               </children>
+            </VBox>
+</Pane>
