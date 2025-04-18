@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="24" class="java.beans.XMLDecoder">
+ <object class="net.windyweather.syncfiles.WindowPosSize" id="WindowPosSize0">
+  <void class="net.windyweather.syncfiles.WindowPosSize" method="getField">
+   <string>dPosX</string>
+   <void method="set">
+    <object idref="WindowPosSize0"/>
+    <object class="javafx.beans.property.SimpleDoubleProperty"/>
+   </void>
+  </void>
+  <void class="net.windyweather.syncfiles.WindowPosSize" method="getField">
+   <string>dPosY</string>
+   <void method="set">
+    <object idref="WindowPosSize0"/>
+    <object class="javafx.beans.property.SimpleDoubleProperty"/>
+   </void>
+  </void>
+  <void class="net.windyweather.syncfiles.WindowPosSize" method="getField">
+   <string>dSizeX</string>
+   <void method="set">
+    <object idref="WindowPosSize0"/>
+    <object class="javafx.beans.property.SimpleDoubleProperty"/>
+   </void>
+  </void>
+  <void class="net.windyweather.syncfiles.WindowPosSize" method="getField">
+   <string>dSizeY</string>
+   <void method="set">
+    <object idref="WindowPosSize0"/>
+    <object class="javafx.beans.property.SimpleDoubleProperty"/>
+   </void>
+  </void>
+  <void property="dPosX">
+   <double>624.0</double>
+  </void>
+  <void property="dPosY">
+   <double>486.3999938964844</double>
+  </void>
+  <void property="dSizeX">
+   <double>847.2000122070312</double>
+  </void>
+  <void property="dSizeY">
+   <double>583.2000122070312</double>
+  </void>
+ </object>
+</java>
