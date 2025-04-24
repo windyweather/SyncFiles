@@ -2,6 +2,7 @@ package net.windyweather.syncfiles;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -13,6 +14,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -30,7 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.prefs.Preferences;
+
+import org.codehaus.plexus.util.DirectoryScanner;
+
 
 import static net.windyweather.syncfiles.SyncFilesApp.*;
 
@@ -48,6 +52,22 @@ public class SyncFilesController {
     public TableColumn<SyncFilesPair, String> tcPathPair;
     public TableColumn<SyncFilesPair, String> tcPairStatus;
     //private Label welcomeText;
+    public TreeTableView<SyncFileOperation> tvFileTree;
+    public TreeTableColumn<SyncFileOperation, String> tcSourcePath;
+    public TreeTableColumn<SyncFileOperation, Integer> tcFileSize;
+    public TreeTableColumn<SyncFileOperation, String> tcActionPending;
+    public TreeTableColumn<SyncFileOperation, String> tcStatus;
+    public CheckBox chkExcludeFileTypes;
+    public TextField txtExcludeFileTypes;
+    public TextField txtFilePathOne;
+    public TextField txtFilePathTwo;
+    public CheckBox chkIncludeSubfolders;
+    public Button btnTwoToOne;
+    public Button btnOneToTwo;
+    public Label lblLastSyncDateTime;
+    public Label lblTotalBytes;
+    public Label lblOperations;
+    public Label lblProgress;
 
 
     /*
@@ -61,9 +81,35 @@ public class SyncFilesController {
         //welcomeText.setText("Welcome to SyncFiles Application!");
     }
 
+    private  long longTotalBytes;
+    private int intOperations;
+
+
+    public SyncFilesController() {};
+
     /*
-Put some text in the status line to say what's up
-*/
+        Make the total bytes easily readable
+     */
+    private void SetTotalBytes() {
+
+        String sTotalBytes = "";
+
+        if ( longTotalBytes < 10000 )  {
+            sTotalBytes = String.valueOf(longTotalBytes);
+        } else if ( longTotalBytes < 10000000 ) {
+            sTotalBytes = String.valueOf( longTotalBytes / 1024 )+" KB";
+        } else if ( longTotalBytes < 10000000000L ) {
+            sTotalBytes = String.valueOf( longTotalBytes / (1024*1024) )+" MB";
+        } else if ( longTotalBytes < 10000000000000L ) {
+            sTotalBytes = String.valueOf( longTotalBytes / ( 1024L*1024L*1024L) )+" GB";
+        }
+        lblTotalBytes.setText( sTotalBytes);
+    }
+
+
+    /*
+        Put some text in the status line to say what's up
+    */
     public void setStatus( String sts ) {
 
         lblStatus.setText( sts );
@@ -200,7 +246,45 @@ Put some text in the status line to say what's up
 
         RestorePairsList();
 
-    }
+
+
+        chkIncludeSubfolders.setSelected( true );
+
+        txtFilePathOne.focusedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(!newValue) {
+                    System.out.println( String.format("Change FilePathOne? %s", txtFilePathOne.getText() ) );
+                    btnOneToTwo.setDisable( false );
+                }
+            }
+        });
+
+
+        txtFilePathTwo.focusedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                if(!newValue) {
+                    System.out.println( String.format("Change FilePathTwo? %s", txtFilePathTwo.getText() ) );
+                    btnTwoToOne.setDisable( false );
+                }
+            }
+        });
+
+       /*
+            Property Value Factories for Tree Columns
+         */
+        tcSourcePath.setCellValueFactory( new TreeItemPropertyValueFactory<>("SSourcePath"));
+        tcFileSize.setCellValueFactory( new TreeItemPropertyValueFactory<>("IntSize"));
+        tcActionPending.setCellValueFactory( new TreeItemPropertyValueFactory<>( "SOperation"));
+        tcStatus.setCellValueFactory( new TreeItemPropertyValueFactory<>("Status"));
+
+        tcFileSize.setStyle("-fx-alignment: CENTER-RIGHT;");
+        tcActionPending.setStyle("-fx-alignment: CENTER;");
+        tcStatus.setStyle("-fx-alignment: CENTER;");
+
+
+    } // end of SetUpStuff
 
     /*
     break out the close stuff here so we can call it from two places
@@ -220,16 +304,6 @@ Put some text in the status line to say what's up
             if a menu item or button closed the app.
          */
         Stage stage = (Stage)splitPaneOutsideContainer.getScene().getWindow();
-        /*
-            No more dirty preferences calls - Who knows where they have been.
-         */
-        if ( false ) {
-            Preferences preferences = Preferences.userRoot().node(NODE_NAME);
-            preferences.putDouble(WINDOW_POSITION_X, stage.getX());
-            preferences.putDouble(WINDOW_POSITION_Y, stage.getY());
-            preferences.putDouble(WINDOW_WIDTH, stage.getWidth());
-            preferences.putDouble(WINDOW_HEIGHT, stage.getHeight());
-        }
 
         /*
             Call the shiny new Window XML Save
@@ -460,10 +534,118 @@ Put some text in the status line to say what's up
         setStatus("Pair Removed");
     }
 
+
+
+    private void GetTreeChildren( TreeItem<SyncFileOperation> treeNode ) {
+        /*
+            Get the children of this node, then for each that is a folder,
+            this again to get their children. Expand the whole tree.
+         */
+        SyncFileOperation sfo = treeNode.getValue();
+        String sPath = sfo.getFullPath();
+        printSysOut("GetTreeChildren : " + sPath);
+
+        String[] saIncludeEverything = new String[]{"*.*", "*"};
+
+        DirectoryScanner scanner = new DirectoryScanner();
+        scanner.setIncludes(saIncludeEverything);
+        scanner.setCaseSensitive(false);
+        scanner.setBasedir(new File(sPath));
+        scanner.scan();
+
+       /*
+            Get a list of the source files we found
+        */
+        String[] sSourceFiles = scanner.getIncludedFiles();
+        printSysOut("GetTreeChildren Scanner Found : " + String.valueOf(sSourceFiles.length));
+
+        for (String sSourceFile : sSourceFiles) {
+            String sDeeperPath = sPath + File.separator + sSourceFile;
+
+            File aFile = new File(sDeeperPath);
+            Path pDeeperPath = new File(sDeeperPath).toPath();
+
+            printSysOut("GetTreeChildren Add File : " + sDeeperPath);
+            SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath);
+            TreeItem<SyncFileOperation> deepNode = new TreeItem<>(sfoDeeper);
+            longTotalBytes += sfoDeeper.getIntSize();
+
+            treeNode.getChildren().add(deepNode);
+
+        }
+        /*
+            Look in subfolders?
+         */
+        if ( !chkIncludeSubfolders.isSelected() ) {
+            /*
+                Nope, we are done
+             */
+            return;
+        }
+        /*
+            Scan all the dirs
+         */
+        String[] sSourceDirs = scanner.getIncludedDirectories();
+        for (String sSourceDir : sSourceDirs) {
+            String sDeeperPath = sPath + File.separator + sSourceDir;
+            Path pDeeperPath = new File(sDeeperPath).toPath();
+
+            printSysOut("GetTreeChildren Add Directory : " + sDeeperPath);
+            SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath);
+
+            TreeItem<SyncFileOperation> deepNode = new TreeItem<>(sfoDeeper);
+            deepNode.setExpanded(true);
+
+            treeNode.getChildren().add(deepNode);
+            treeNode.setExpanded(true);
+
+            GetTreeChildren(deepNode);
+        }
+    }
+
+
+
+
     public void OnPairOneToTwo(ActionEvent actionEvent) {
+
+
+        printSysOut("OnPairOneToTwo");
+
+        longTotalBytes = 0L;
+        intOperations = 0;
+
+
+        /*
+            Load up the tree starting with the path in the PathOne
+         */
+        File aFile = new File( txtFilePathOne.getText() );
+        Path pathPathOne = aFile.toPath();
+
+        if ( !aFile.exists() ) {
+            // nowhere....
+        }
+
+        SyncFileOperation root = new SyncFileOperation(pathPathOne);
+        TreeItem<SyncFileOperation> treeNode = new TreeItem<> (root);
+        treeNode.setExpanded(true);
+
+        tvFileTree.setRoot( treeNode );
+        longTotalBytes += root.getIntSize();
+        /*
+            If the root is a folder, then scan it all the way down
+         */
+        if ( root.isDirectory() ) {
+            GetTreeChildren( treeNode );
+        }
+        /*
+            Put a readable size in the display
+         */
+        SetTotalBytes();
+
     }
 
     public void OnPairTwoToOne(ActionEvent actionEvent) {
+        printSysOut("OnPairTwoToOne");
     }
 
     public void OnSavePairs(ActionEvent actionEvent) {
@@ -471,5 +653,16 @@ Put some text in the status line to say what's up
         setStatus("Pairs Saved");
     }
 
+
+    public void OnClickFilePathOne(ActionEvent actionEvent) {
+        txtFilePathOne.setText("D:\\zzSSATest\\BunchOfImages");
+
+    }
+
+
+    public void OnClickFilePathTwo(ActionEvent actionEvent) {
+        txtFilePathTwo.setText("D:\\zzSSATest\\SourceTest\\Stuff Here\\Stuff_2024_12_01_11_06_41_327.png");
+
+    }
 
 }
