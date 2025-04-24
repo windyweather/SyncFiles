@@ -104,6 +104,7 @@ public class SyncFilesController {
             sTotalBytes = String.valueOf( longTotalBytes / ( 1024L*1024L*1024L) )+" GB";
         }
         lblTotalBytes.setText( sTotalBytes);
+        lblOperations.setText( String.valueOf(intOperations));
     }
 
 
@@ -294,8 +295,8 @@ public class SyncFilesController {
         /*
             write the Pairs List
          */
-
-        //SavePairsList();
+        SavePairsList();
+        //setStatus("Pairs Saved");
 
         printSysOut("AppCloseStuffToDo: Save Window Pos/Size");
 
@@ -309,6 +310,8 @@ public class SyncFilesController {
             Call the shiny new Window XML Save
          */
         WindowSaveRestore.SaveWindowPosSize( stage );
+
+
     }
 
     /*
@@ -345,6 +348,28 @@ public class SyncFilesController {
         tvPairTable.scrollTo( idx);
     }
 
+    /*
+        Add a new pair at the top and focus on it
+     */
+    private void ANewPair() {
+
+        SyncFilesPair aPair = new SyncFilesPair( "New Pair", "none");
+
+        String sName = aPair.sPairName.getValue();
+        printSysOut(String.format("String.valueOf(aPair.sPairName) : %s", sName));
+        aPair.sFilePathOne = new SimpleStringProperty("");
+        aPair.sFilePathTwo = new SimpleStringProperty("");
+        aPair.sExcludeFileTypes = new SimpleStringProperty("" + sName);
+        aPair.bSubFolders = new SimpleBooleanProperty(true);
+        aPair.bVerifyCopied = new SimpleBooleanProperty(false );
+        aPair.bVerifyNotCopied = new SimpleBooleanProperty(false );
+        aPair.bRecoverVerifyFailure = new SimpleBooleanProperty(false );
+        aPair.bOverrideReadOnly = new SimpleBooleanProperty(false );
+
+        pairObservableList.addFirst(aPair);
+        SelectAndFocusIndex( 0 );
+
+    }
     /*
         Load the list with some pair names/status
      */
@@ -389,7 +414,8 @@ public class SyncFilesController {
 
     public void OnNewPair(ActionEvent actionEvent) {
         printSysOut("OnNewPair");
-        SomeTestPairData();
+        ANewPair();
+        setStatus("New Pair Created");
     }
 
     public void OnAboutApp(ActionEvent actionEvent) throws IOException {
@@ -413,9 +439,6 @@ public class SyncFilesController {
 
          printSysOut("onAbout - show about dialog");
         stage.show();
-
-
-
 
     }
 
@@ -534,7 +557,9 @@ public class SyncFilesController {
         setStatus("Pair Removed");
     }
 
-
+    /*
+        Recursively look through the source and find all the files
+     */
 
     private void GetTreeChildren( TreeItem<SyncFileOperation> treeNode ) {
         /*
@@ -569,6 +594,7 @@ public class SyncFilesController {
             SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath);
             TreeItem<SyncFileOperation> deepNode = new TreeItem<>(sfoDeeper);
             longTotalBytes += sfoDeeper.getIntSize();
+            intOperations++;
 
             treeNode.getChildren().add(deepNode);
 
@@ -598,6 +624,11 @@ public class SyncFilesController {
 
             treeNode.getChildren().add(deepNode);
             treeNode.setExpanded(true);
+            /*
+                A directory adds no bytes, but it does add an operation to
+                create it, maybe.
+             */
+            intOperations++;
 
             GetTreeChildren(deepNode);
         }
@@ -631,6 +662,7 @@ public class SyncFilesController {
 
         tvFileTree.setRoot( treeNode );
         longTotalBytes += root.getIntSize();
+        intOperations++;
         /*
             If the root is a folder, then scan it all the way down
          */
@@ -665,4 +697,45 @@ public class SyncFilesController {
 
     }
 
+    public void OnMenuSavePairs(ActionEvent actionEvent) {
+        OnSavePairs( actionEvent );
+    }
+
+    public void OnMenuRemoveAllPairs(ActionEvent actionEvent) {
+
+               /*
+            Confirm the user wants to do this
+         */
+        setStatus("Confirm or Cancel");
+        Alert cnfrmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        Window wParent = tvPairTable.getScene().getWindow();
+        cnfrmAlert.initOwner( wParent);
+        cnfrmAlert.setTitle("Confirm Remove All Pairs?");
+        cnfrmAlert.setHeaderText( "Confirm Remove All Pairs");
+        cnfrmAlert.setContentText("Remove All Pairs cannot be UnDone" );
+        Optional<ButtonType> result = cnfrmAlert.showAndWait();
+        if ( result.isEmpty() || result.get() != ButtonType.OK ) {
+            setStatus( "Remove All Pairs canceled");
+            return;
+        }
+        /*
+            Remove ALL THE PAIRS...
+         */
+        pairObservableList.clear();
+
+        setStatus("All Pairs Removed");
+    }
+
+    public void OnMenuCloseApp(ActionEvent actionEvent) {
+        OnCloseButton(actionEvent );
+    }
+
+    public void OnMakeTestPairs(ActionEvent actionEvent) {
+
+        /*
+            Make some test pairs
+         */
+        SomeTestPairData();
+        setStatus("Test pairs made");
+    }
 }
