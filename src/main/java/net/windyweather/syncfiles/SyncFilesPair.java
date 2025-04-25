@@ -17,6 +17,8 @@ public class SyncFilesPair {
     public SimpleStringProperty sFilePathOne;
     public SimpleStringProperty sFilePathTwo;
     public SimpleStringProperty sExcludeFileTypes;
+    public SimpleStringProperty sLastSyncDateTime;
+    public SimpleBooleanProperty bExcludeFileTypes;
     public SimpleBooleanProperty bSubFolders;
     public SimpleBooleanProperty bVerifyCopied;
     public SimpleBooleanProperty bVerifyNotCopied;
@@ -25,16 +27,30 @@ public class SyncFilesPair {
 
 
     public SyncFilesPair() {
+        sPairName = new SimpleStringProperty();
+        sPairStatus = new SimpleStringProperty();
+        sFilePathOne = new SimpleStringProperty();
+        sFilePathTwo = new SimpleStringProperty();
+        sLastSyncDateTime = new SimpleStringProperty();
+        bExcludeFileTypes = new SimpleBooleanProperty();
+        bSubFolders = new SimpleBooleanProperty();
+        bVerifyCopied = new SimpleBooleanProperty();
+        bVerifyNotCopied = new SimpleBooleanProperty();
+        bRecoverVerifyFailure = new SimpleBooleanProperty();
+        bOverrideReadOnly = new SimpleBooleanProperty();
+
 
     }
 
     public SyncFilesPair( String sName, String sStatus ){
 
+        this();
         sPairName = new SimpleStringProperty( sName );
         sPairStatus = new SimpleStringProperty( sStatus );
     }
 
     public SyncFilesPair( String sName ) {
+        this();
         sPairName = new SimpleStringProperty( sName );
     }
 
@@ -43,6 +59,7 @@ public class SyncFilesPair {
     public StringProperty sFilePathOneProperty() { return sFilePathOne; }
     public StringProperty sFilePathTwoProperty() { return sFilePathTwo; }
     public StringProperty sExcludeFileTypes() { return sExcludeFileTypes; }
+    public BooleanProperty bExcludeFileTypes() { return bExcludeFileTypes; }
     public BooleanProperty bSubFolders() { return bSubFolders; }
     public BooleanProperty bVerifyCopied() { return bVerifyCopied; }
     public BooleanProperty bVerifyNotCopied() { return bVerifyNotCopied; }

@@ -43,12 +43,13 @@ public class SyncFileOperation extends TreeItem<String> {
     static final String SFO_VERFIED = "VERIFIED";
     static final String SFO_RECOVERED = "RECOVERED";
 
-    String sName;
-    String sSourcePath;
-    String sDestinationPath;
-    int intSize;
-    String sOperation; //
-    String Status;
+    public String sName;
+    public String sSourcePath;
+    public String sDestinationPath;
+    public int intSize;
+    public String sOperation; //
+    public String Status;
+
 
     /*
     public static Image folderCollapseImage = new Image(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("net.windyweather.synchtestgui/File_Folder.svg")));

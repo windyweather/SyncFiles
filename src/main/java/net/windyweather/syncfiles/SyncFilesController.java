@@ -38,30 +38,39 @@ import org.codehaus.plexus.util.DirectoryScanner;
 
 import static net.windyweather.syncfiles.SyncFilesApp.*;
 
+/*
+    Controller class for GUI - Pretty much the whole program is here
+ */
 public class SyncFilesController {
 
-    public Label lblStatus;
+
     /*
-            Define the list that the TableView will watch
+             Define the list that the TableView will watch
          */
     ObservableList<SyncFilesPair> pairObservableList = FXCollections.observableArrayList();
-
 
     public SplitPane splitPaneOutsideContainer;
     public TableView<SyncFilesPair> tvPairTable;
     public TableColumn<SyncFilesPair, String> tcPathPair;
     public TableColumn<SyncFilesPair, String> tcPairStatus;
-    //private Label welcomeText;
+    public Label lblStatus;
     public TreeTableView<SyncFileOperation> tvFileTree;
     public TreeTableColumn<SyncFileOperation, String> tcSourcePath;
     public TreeTableColumn<SyncFileOperation, Integer> tcFileSize;
     public TreeTableColumn<SyncFileOperation, String> tcActionPending;
     public TreeTableColumn<SyncFileOperation, String> tcStatus;
+
+    public TextField txtPairName;
     public CheckBox chkExcludeFileTypes;
     public TextField txtExcludeFileTypes;
     public TextField txtFilePathOne;
     public TextField txtFilePathTwo;
     public CheckBox chkIncludeSubfolders;
+    public CheckBox chkVerifyCopied;
+    public CheckBox chkVerifyNotCopied;
+    public CheckBox chkRecoverVerifyFailure;
+    public CheckBox chkOverrideReadOnly;
+
     public Button btnTwoToOne;
     public Button btnOneToTwo;
     public Label lblLastSyncDateTime;
@@ -84,6 +93,7 @@ public class SyncFilesController {
     private  long longTotalBytes;
     private int intOperations;
 
+    private SyncFilesPair theOpenPair;
 
     public SyncFilesController() {};
 
@@ -205,7 +215,7 @@ public class SyncFilesController {
         placeholder.setText("Use New Pair then fill out\nthe pair in the Right Panel and\n"+
                 "use Save Pair.");
         tvPairTable.setPlaceholder(placeholder);
-        tcPairStatus.setStyle( "-fx-alignment: CENTER-RIGHT;");
+        tcPairStatus.setStyle( "-fx-alignment: CENTER;");
 
         printSysOut("Set up CellValueFactories for Columns");
 
@@ -360,6 +370,7 @@ public class SyncFilesController {
         aPair.sFilePathOne = new SimpleStringProperty("");
         aPair.sFilePathTwo = new SimpleStringProperty("");
         aPair.sExcludeFileTypes = new SimpleStringProperty("" + sName);
+        aPair.bExcludeFileTypes = new SimpleBooleanProperty( false );
         aPair.bSubFolders = new SimpleBooleanProperty(true);
         aPair.bVerifyCopied = new SimpleBooleanProperty(false );
         aPair.bVerifyNotCopied = new SimpleBooleanProperty(false );
@@ -442,7 +453,93 @@ public class SyncFilesController {
 
     }
 
+    /*
+        Did the user screw up and leave unsaved changes in the GUI?
+     */
+    private boolean OpenPairUnsavedChanges() {
+
+        if ( ( theOpenPair.sPairName.getValue().equals(txtPairName.getText() ) ) &&
+                ( theOpenPair.bOverrideReadOnly.getValue() == chkOverrideReadOnly.isSelected() ) &&
+                ( theOpenPair.bRecoverVerifyFailure.getValue() == chkRecoverVerifyFailure.isSelected() ) &&
+                ( theOpenPair.bVerifyCopied.getValue() == chkVerifyCopied.isSelected() ) &&
+                ( theOpenPair.bVerifyNotCopied.getValue() == chkVerifyNotCopied.isSelected() ) &&
+                ( theOpenPair.bSubFolders.getValue() == chkIncludeSubfolders.isSelected() ) &&
+                ( theOpenPair.sFilePathOne.getValue().equals( txtFilePathOne.getText() )) &&
+                ( theOpenPair.sFilePathTwo.getValue().equals( txtFilePathTwo.getText() ))
+        ) {
+            return false; // No Unsaved changes
+        }
+        return true;
+    }
+
+    /*
+        Open a pair in the right panel
+     */
     public void OnOpenPair(ActionEvent actionEvent) {
+
+        if ( theOpenPair != null && OpenPairUnsavedChanges() ) {
+            /*
+            Confirm the user wants to do this
+            */
+            setStatus("Unsaved Changes");
+            Alert cnfrmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            Window wParent = tvPairTable.getScene().getWindow();
+            cnfrmAlert.initOwner( wParent);
+            cnfrmAlert.setTitle("Confirm Lose Unsaved Changes to Pair?");
+            cnfrmAlert.setHeaderText( "Confirm Lose Unsaved Changes to Open Pair");
+            cnfrmAlert.setContentText("Loss cannot be UnDone" );
+            Optional<ButtonType> result = cnfrmAlert.showAndWait();
+            if ( result.isEmpty() || result.get() != ButtonType.OK ) {
+                setStatus( "Open canceled");
+                return;
+            }
+
+        }
+
+        int idx = tvPairTable.getSelectionModel().getSelectedIndex();
+        if ( idx == -1 ) {
+            setStatus("Select Item");
+            return;
+        }
+        if ( theOpenPair != null ) {
+            theOpenPair.sPairStatus.setValue( "Closed");
+        }
+        theOpenPair = pairObservableList.get(idx);
+
+        txtPairName.setText( theOpenPair.sPairName.getValue() );
+        txtFilePathOne.setText( theOpenPair.sFilePathOne.getValue() );
+        txtFilePathTwo.setText( theOpenPair.sFilePathTwo.getValue() );
+        chkExcludeFileTypes.setSelected( theOpenPair.bExcludeFileTypes.getValue() );
+        txtExcludeFileTypes.setText( theOpenPair.sExcludeFileTypes.getValue() );
+        chkIncludeSubfolders.setSelected( theOpenPair.bSubFolders.getValue() );
+        chkVerifyCopied.setSelected( theOpenPair.bVerifyCopied.getValue() );
+        chkVerifyNotCopied.setSelected( theOpenPair.bVerifyNotCopied.getValue() );
+        chkRecoverVerifyFailure.setSelected( theOpenPair.bRecoverVerifyFailure.getValue() );
+        chkOverrideReadOnly.setSelected( theOpenPair.bOverrideReadOnly.getValue() );
+
+        theOpenPair.sPairStatus.setValue( "Open");
+        setStatus("Pair Opened");
+    }
+
+    public void OnUpdatePair(ActionEvent actionEvent) {
+
+        if ( theOpenPair == null ) {
+            setStatus("No Pair is Open");
+            return;
+        }
+
+        theOpenPair.sPairName.setValue( txtPairName.getText() );
+        theOpenPair.sFilePathOne.setValue( txtFilePathOne.getText() );
+        theOpenPair.sFilePathTwo.setValue( txtFilePathTwo.getText() );
+        theOpenPair.sExcludeFileTypes.setValue( txtExcludeFileTypes.getText() );
+        theOpenPair.bExcludeFileTypes.setValue( chkExcludeFileTypes.isSelected() );
+        theOpenPair.bSubFolders.setValue( chkIncludeSubfolders.isSelected() );
+        theOpenPair.bVerifyCopied.setValue( chkVerifyCopied.isSelected() );
+        theOpenPair.bVerifyNotCopied.setValue( chkVerifyNotCopied.isSelected() );
+        theOpenPair.bRecoverVerifyFailure.setValue( chkRecoverVerifyFailure.isSelected() );
+        theOpenPair.bOverrideReadOnly.setValue( chkOverrideReadOnly.isSelected() );
+
+        setStatus("Pair Updated");
     }
 
     public void OnPairMoveUp(ActionEvent actionEvent) {
@@ -738,4 +835,6 @@ public class SyncFilesController {
         SomeTestPairData();
         setStatus("Test pairs made");
     }
+
+
 }

@@ -132,7 +132,7 @@
                                                         <Font name="System Bold" size="14.0" />
                                                     </font>
                                                 </Label>
-                                                <TextField layoutX="195.0" layoutY="70.0" prefHeight="30.0" prefWidth="301.0">
+                                                <TextField fx:id="txtPairName" layoutX="195.0" layoutY="70.0" prefHeight="30.0" prefWidth="301.0">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>
@@ -199,22 +199,22 @@
                                                         <Font name="System Bold" size="14.0" />
                                                     </font>
                                                 </Label>
-                                                <CheckBox layoutX="98.0" layoutY="55.0" mnemonicParsing="false" text="Verify Copied">
+                                                <CheckBox fx:id="chkVerifyCopied" layoutX="98.0" layoutY="55.0" mnemonicParsing="false" text="Verify Copied">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>
                                                 </CheckBox>
-                                                <CheckBox layoutX="98.0" layoutY="88.0" mnemonicParsing="false" text="Verify Not Copied">
+                                                <CheckBox fx:id="chkVerifyNotCopied" layoutX="98.0" layoutY="88.0" mnemonicParsing="false" text="Verify Not Copied">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>
                                                 </CheckBox>
-                                                <CheckBox layoutX="98.0" layoutY="118.0" mnemonicParsing="false" text="Recover Verify Failure">
+                                                <CheckBox fx:id="chkRecoverVerifyFailure" layoutX="98.0" layoutY="118.0" mnemonicParsing="false" text="Recover Verify Failure">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>
                                                 </CheckBox>
-                                                <CheckBox layoutX="414.0" layoutY="55.0" mnemonicParsing="false" text="Override Read-Only">
+                                                <CheckBox fx:id="chkOverrideReadOnly" layoutX="414.0" layoutY="55.0" mnemonicParsing="false" text="Override Read-Only">
                                                     <font>
                                                         <Font size="14.0" />
                                                     </font>
@@ -367,7 +367,7 @@
                                         <Insets left="10.0" />
                                     </HBox.margin>
                                 </Button>
-                                <Button layoutX="166.0" layoutY="10.0" mnemonicParsing="false" text=" Update Pair">
+                                <Button layoutX="166.0" layoutY="10.0" mnemonicParsing="false" onAction="#OnUpdatePair" text=" Update Pair">
                                     <HBox.margin>
                                         <Insets left="10.0" />
                                     </HBox.margin>
