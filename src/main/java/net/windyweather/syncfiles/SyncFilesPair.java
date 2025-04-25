@@ -32,6 +32,7 @@ public class SyncFilesPair {
         sFilePathOne = new SimpleStringProperty();
         sFilePathTwo = new SimpleStringProperty();
         sLastSyncDateTime = new SimpleStringProperty();
+        sExcludeFileTypes = new SimpleStringProperty();
         bExcludeFileTypes = new SimpleBooleanProperty();
         bSubFolders = new SimpleBooleanProperty();
         bVerifyCopied = new SimpleBooleanProperty();

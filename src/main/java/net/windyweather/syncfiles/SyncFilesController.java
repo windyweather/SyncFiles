@@ -369,7 +369,7 @@ public class SyncFilesController {
         printSysOut(String.format("String.valueOf(aPair.sPairName) : %s", sName));
         aPair.sFilePathOne = new SimpleStringProperty("");
         aPair.sFilePathTwo = new SimpleStringProperty("");
-        aPair.sExcludeFileTypes = new SimpleStringProperty("" + sName);
+        aPair.sExcludeFileTypes = new SimpleStringProperty("" );
         aPair.bExcludeFileTypes = new SimpleBooleanProperty( false );
         aPair.bSubFolders = new SimpleBooleanProperty(true);
         aPair.bVerifyCopied = new SimpleBooleanProperty(false );
@@ -408,7 +408,7 @@ public class SyncFilesController {
             aPair.sFilePathOne = new SimpleStringProperty("D:\\YourGameHere\\ScreenShots\\"+sName);
             aPair.sFilePathTwo = new SimpleStringProperty("E:\\BackupOfScreenShots\\"+sName);
             aPair.sExcludeFileTypes = new SimpleStringProperty( ".Some;.Excluded;.Types;."+sName);
-            aPair.bSubFolders = new SimpleBooleanProperty( (idx % 5) == 0 );
+            aPair.bSubFolders = new SimpleBooleanProperty( (idx % 2) == 0 );
             aPair.bVerifyCopied = new SimpleBooleanProperty( (idx % 6) == 0 );
             aPair.bVerifyNotCopied = new SimpleBooleanProperty( (idx % 7) == 0 );
             aPair.bRecoverVerifyFailure = new SimpleBooleanProperty( (idx % 9) == 0 );
