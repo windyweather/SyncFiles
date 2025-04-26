@@ -28,10 +28,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import org.codehaus.plexus.util.DirectoryScanner;
 
@@ -117,6 +115,16 @@ public class SyncFilesController {
         lblOperations.setText( String.valueOf(intOperations));
     }
 
+    /*
+    Test this now, but later only when we do a copy
+    */
+    private void SetLastSyncDateTime() {
+
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MMM-dd HH:mm");
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        lblLastSyncDateTime.setText( strDate );
+    }
 
     /*
         Put some text in the status line to say what's up
@@ -152,12 +160,7 @@ public class SyncFilesController {
         /*
             Write each pair out and then close the file
          */
-        if ( false ) {
-            for (SyncFilesPair pair : pairObservableList) {
-                assert encoder != null;
-                encoder.writeObject(pair);
-            }
-        }
+
         assert encoder != null;
         encoder.writeObject( listOfPairs );
 
@@ -171,27 +174,29 @@ public class SyncFilesController {
      */
 
     void RestorePairsList()  {
-        if ( true ) {
-            // Use XMLDecoder to read the XML file in.
-            List<SyncFilesPair> listFromXML = List.of();
-            try {
-                printSysOut("RestorePairsList");
-                final XMLDecoder decoder = new XMLDecoder(new FileInputStream(sXMLPairsListPath));
-                listFromXML = (List<SyncFilesPair>) decoder.readObject();
-                decoder.close();
-                printSysOut(String.format("%d pairs restored", pairObservableList.size()));
 
-            } catch (Exception e) {
-                printSysOut(String.format("Pairs Not Restored %s", sXMLPairsListPath));
-            }
-            printSysOut(String.format("RestorePairsList %d pairs restored", listFromXML.size() ));
+        // Use XMLDecoder to read the XML file in.
+        List<SyncFilesPair> listFromXML = List.of();
+        try {
+            printSysOut("RestorePairsList");
+            final XMLDecoder decoder = new XMLDecoder(new FileInputStream(sXMLPairsListPath));
+            listFromXML = (List<SyncFilesPair>) decoder.readObject();
+            decoder.close();
+            printSysOut(String.format("%d pairs restored", pairObservableList.size()));
 
-            if (!listFromXML.isEmpty())
-            {
-                pairObservableList.addAll( listFromXML );
-                setStatus(String.format("%d pairs restored", listFromXML.size()));
-            }
+        } catch (Exception e) {
+            printSysOut(String.format("Pairs Not Restored %s", sXMLPairsListPath));
         }
+        printSysOut(String.format("RestorePairsList %d pairs restored", listFromXML.size() ));
+
+        if (!listFromXML.isEmpty())
+        {
+            pairObservableList.addAll( listFromXML );
+            setStatus(String.format("%d pairs restored", listFromXML.size()));
+        } else {
+            setStatus( "No Saved Pairs Found");
+        }
+
     }
 
 
@@ -376,6 +381,7 @@ public class SyncFilesController {
         aPair.bVerifyNotCopied = new SimpleBooleanProperty(false );
         aPair.bRecoverVerifyFailure = new SimpleBooleanProperty(false );
         aPair.bOverrideReadOnly = new SimpleBooleanProperty(false );
+        aPair.sLastSyncDateTime = new SimpleStringProperty("");
 
         pairObservableList.addFirst(aPair);
         SelectAndFocusIndex( 0 );
@@ -465,7 +471,8 @@ public class SyncFilesController {
                 ( theOpenPair.bVerifyNotCopied.getValue() == chkVerifyNotCopied.isSelected() ) &&
                 ( theOpenPair.bSubFolders.getValue() == chkIncludeSubfolders.isSelected() ) &&
                 ( theOpenPair.sFilePathOne.getValue().equals( txtFilePathOne.getText() )) &&
-                ( theOpenPair.sFilePathTwo.getValue().equals( txtFilePathTwo.getText() ))
+                ( theOpenPair.sFilePathTwo.getValue().equals( txtFilePathTwo.getText() )) &&
+                ( theOpenPair.sLastSyncDateTime.getValue().equals( lblLastSyncDateTime.getText() ))
         ) {
             return false; // No Unsaved changes
         }
@@ -517,8 +524,55 @@ public class SyncFilesController {
         chkRecoverVerifyFailure.setSelected( theOpenPair.bRecoverVerifyFailure.getValue() );
         chkOverrideReadOnly.setSelected( theOpenPair.bOverrideReadOnly.getValue() );
 
+        lblLastSyncDateTime.setText( theOpenPair.sLastSyncDateTime.getValue() );
+
         theOpenPair.sPairStatus.setValue( "Open");
+        /*
+            Clear the operation tree too
+         */
+        ClearOperationTree();
         setStatus("Pair Opened");
+    }
+
+    /*
+        Clear out the right side of the GUI since we have
+        no pair here. Both the fields and the operation tree
+     */
+    private void ClearPairGui() {
+        txtPairName.setText("");
+        txtFilePathOne.setText("");
+        txtFilePathTwo.setText("");
+        chkExcludeFileTypes.setSelected(false);
+        txtExcludeFileTypes.setText("");
+        chkIncludeSubfolders.setSelected(true);
+        chkVerifyCopied.setSelected(false);
+        chkVerifyNotCopied.setSelected(false);
+        chkRecoverVerifyFailure.setSelected(false);
+        chkOverrideReadOnly.setSelected(false);
+
+        lblLastSyncDateTime.setText("");
+        lblOperations.setText("");
+        lblTotalBytes.setText("");
+        lblProgress.setText("");
+    }
+
+    /*
+        Clear the tree and the operations related GUI stuff
+     */
+    private void ClearOperationTree() {
+
+        //SyncFileOperation root = new SyncFileOperation(Path.of(""));
+        //TreeItem<SyncFileOperation> treeNode = new TreeItem<> ();
+        //treeNode.setExpanded(false);
+
+        tvFileTree.setRoot( null );
+
+
+        lblProgress.setText("");
+        lblOperations.setText("");
+        lblTotalBytes.setText("");
+        lblLastSyncDateTime.setText("");
+
     }
 
     public void OnUpdatePair(ActionEvent actionEvent) {
@@ -538,6 +592,11 @@ public class SyncFilesController {
         theOpenPair.bVerifyNotCopied.setValue( chkVerifyNotCopied.isSelected() );
         theOpenPair.bRecoverVerifyFailure.setValue( chkRecoverVerifyFailure.isSelected() );
         theOpenPair.bOverrideReadOnly.setValue( chkOverrideReadOnly.isSelected() );
+
+        /*
+            Be sure and save the last time we sync'd the files too
+         */
+        theOpenPair.sLastSyncDateTime.setValue( lblLastSyncDateTime.getText() );
 
         setStatus("Pair Updated");
     }
@@ -646,6 +705,17 @@ public class SyncFilesController {
             setStatus( "Remove canceled");
             return;
         }
+
+        SyncFilesPair aPair = pairObservableList.get( idx );
+        if ( theOpenPair != null && aPair == theOpenPair ) {
+            /*
+                we are removing the open pair. So clear the gui and forget the pair
+                and clear the operation tree
+             */
+            ClearPairGui();
+            ClearOperationTree();
+            theOpenPair = null;
+        }
         /*
             Remove the pair...
          */
@@ -665,7 +735,7 @@ public class SyncFilesController {
          */
         SyncFileOperation sfo = treeNode.getValue();
         String sPath = sfo.getFullPath();
-        printSysOut("GetTreeChildren : " + sPath);
+        //printSysOut("GetTreeChildren : " + sPath);
 
         String[] saIncludeEverything = new String[]{"*.*", "*"};
 
@@ -679,7 +749,7 @@ public class SyncFilesController {
             Get a list of the source files we found
         */
         String[] sSourceFiles = scanner.getIncludedFiles();
-        printSysOut("GetTreeChildren Scanner Found : " + String.valueOf(sSourceFiles.length));
+        //printSysOut("GetTreeChildren Scanner Found : " + String.valueOf(sSourceFiles.length));
 
         for (String sSourceFile : sSourceFiles) {
             String sDeeperPath = sPath + File.separator + sSourceFile;
@@ -687,7 +757,7 @@ public class SyncFilesController {
             File aFile = new File(sDeeperPath);
             Path pDeeperPath = new File(sDeeperPath).toPath();
 
-            printSysOut("GetTreeChildren Add File : " + sDeeperPath);
+            //printSysOut("GetTreeChildren Add File : " + sDeeperPath);
             SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath);
             TreeItem<SyncFileOperation> deepNode = new TreeItem<>(sfoDeeper);
             longTotalBytes += sfoDeeper.getIntSize();
@@ -713,7 +783,7 @@ public class SyncFilesController {
             String sDeeperPath = sPath + File.separator + sSourceDir;
             Path pDeeperPath = new File(sDeeperPath).toPath();
 
-            printSysOut("GetTreeChildren Add Directory : " + sDeeperPath);
+            //printSysOut("GetTreeChildren Add Directory : " + sDeeperPath);
             SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath);
 
             TreeItem<SyncFileOperation> deepNode = new TreeItem<>(sfoDeeper);
@@ -770,6 +840,16 @@ public class SyncFilesController {
             Put a readable size in the display
          */
         SetTotalBytes();
+        /*
+            Test this now, but later only when we do a copy
+         */
+        SetLastSyncDateTime();
+
+        /*
+            Just update the pair to save sync data
+         */
+        OnUpdatePair( actionEvent );
+        setStatus("1 >> 2 complete");
 
     }
 

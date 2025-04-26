@@ -288,7 +288,7 @@
                                         <Insets left="10.0" />
                                     </padding>
                                 </Label>
-                                <Label layoutX="198.0" layoutY="10.0" text="Total Operations">
+                                <Label layoutX="198.0" layoutY="10.0" text="Operations">
                                     <font>
                                         <Font name="System Bold" size="14.0" />
                                     </font>
