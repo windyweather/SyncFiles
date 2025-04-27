@@ -15,6 +15,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.*;
 import javafx.util.Callback;
@@ -279,7 +281,7 @@ public class SyncFilesController {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if(!newValue) {
-                    System.out.println( String.format("Change FilePathOne? %s", txtFilePathOne.getText() ) );
+                    printSysOut( String.format("Change FilePathOne? %s", txtFilePathOne.getText() ) );
                     btnOneToTwo.setDisable( false );
                 }
             }
@@ -290,7 +292,7 @@ public class SyncFilesController {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                 if(!newValue) {
-                    System.out.println( String.format("Change FilePathTwo? %s", txtFilePathTwo.getText() ) );
+                    printSysOut( String.format("Change FilePathTwo? %s", txtFilePathTwo.getText() ) );
                     btnTwoToOne.setDisable( false );
                 }
             }
@@ -326,6 +328,11 @@ public class SyncFilesController {
         btnStop.setDisable(true);
         btnOneToTwo.setDisable(true);
         btnTwoToOne.setDisable(true);
+
+        lblTotalBytes.setText("");
+        lblOperations.setText("");
+        lblProgress.setText("");
+        lblLastSyncDateTime.setText("");
     }
 
     void EnablePairDetails() {
@@ -347,6 +354,14 @@ public class SyncFilesController {
      */
     void AppCloseStuffToDo() {
         printSysOut( "AppCloseStuffToDo - save stuff here" );
+
+        /*
+            Close any open pair
+         */
+        if ( theOpenPair != null ) {
+            theOpenPair.sPairStatus.setValue("Closed");
+            OnUpdatePair( new ActionEvent() );
+        }
         /*
             write the Pairs List
          */
@@ -495,6 +510,17 @@ public class SyncFilesController {
         stage.setResizable(false);
         stage.initOwner( stageOfUs );
 
+                /*
+            Stick a program icon on the window
+         */
+        try {
+            Image imgIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("sync-icon-flip-240.png")) );
+            stage.getIcons().add(imgIcon);
+
+        } catch ( Exception e ) {
+            printSysOut( e.toString() );
+        }
+
          printSysOut("onAbout - show about dialog");
         stage.show();
 
@@ -528,6 +554,18 @@ public class SyncFilesController {
      */
     public void OnOpenPair(ActionEvent actionEvent) {
 
+        int idx = tvPairTable.getSelectionModel().getSelectedIndex();
+        if ( idx == -1 ) {
+            setStatus("Select Item");
+            return;
+        }
+
+        SyncFilesPair anOpenPair = pairObservableList.get(idx);
+        if (anOpenPair == theOpenPair) {
+            setStatus("This Pair Already Open");
+            return;
+        }
+
         if ( theOpenPair != null && OpenPairUnsavedChanges() ) {
             /*
             Confirm the user wants to do this
@@ -547,11 +585,8 @@ public class SyncFilesController {
 
         }
 
-        int idx = tvPairTable.getSelectionModel().getSelectedIndex();
-        if ( idx == -1 ) {
-            setStatus("Select Item");
-            return;
-        }
+
+
         if ( theOpenPair != null ) {
             theOpenPair.sPairStatus.setValue( "Closed");
         }
@@ -766,6 +801,37 @@ public class SyncFilesController {
         setStatus("Pair Removed");
     }
 
+
+    public static boolean bImagesGood = false;
+    public static boolean bImagesTried = false;
+    public static Image folderCollapseImage;
+    public static Image folderExpandImage;
+    public static Image fileImage;
+
+
+    /*
+        Read in the images for the tree
+     */
+    private void SetUpImages() {
+
+        if ( !bImagesGood && bImagesTried ) {
+            return;
+        }
+        bImagesTried = true;
+        try {
+
+            folderExpandImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("File_Folder-open-32.png")) );
+            folderCollapseImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("File_Folder-32.png")));
+            fileImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("File_Text-x-generic-32.png")));
+
+            printSysOut("Tree Images Found");
+            bImagesGood = true;
+        } catch (Exception e) {
+            printSysOut("Tree Images Failed");
+        }
+    }
+
+
     /*
         Recursively look through the source and find all the files
      */
@@ -802,6 +868,10 @@ public class SyncFilesController {
             //printSysOut("GetTreeChildren Add File : " + sDeeperPath);
             SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath);
             TreeItem<SyncFileOperation> deepNode = new TreeItem<>(sfoDeeper);
+            if ( bImagesGood ) {
+                deepNode.setGraphic(new ImageView(fileImage));
+                printSysOut("PathSomeToSome - file Graphic set");
+            }
             longTotalBytes += sfoDeeper.getIntSize();
             intOperations++;
 
@@ -830,6 +900,10 @@ public class SyncFilesController {
 
             TreeItem<SyncFileOperation> deepNode = new TreeItem<>(sfoDeeper);
             deepNode.setExpanded(true);
+            if ( bImagesGood ) {
+                deepNode.setGraphic(new ImageView(folderExpandImage));
+                printSysOut("GetTreeChildren - folder Graphic set");
+            }
 
             treeNode.getChildren().add(deepNode);
             treeNode.setExpanded(true);
@@ -890,6 +964,8 @@ public class SyncFilesController {
         longTotalBytes = 0L;
         intOperations = 0;
 
+        SetUpImages();
+
         /*
             Load up the tree starting with the source path
          */
@@ -906,6 +982,10 @@ public class SyncFilesController {
         SyncFileOperation root = new SyncFileOperation(pathPathSrc);
         TreeItem<SyncFileOperation> treeNode = new TreeItem<> (root);
         treeNode.setExpanded(true);
+        if ( bImagesGood ) {
+            treeNode.setGraphic(new ImageView(fileImage));
+            printSysOut("PathSomeToSome - file Graphic set");
+        }
 
         tvFileTree.setRoot( treeNode );
         longTotalBytes += root.getIntSize();
@@ -914,6 +994,10 @@ public class SyncFilesController {
             If the root is a folder, then scan it all the way down
          */
         if ( root.isDirectory() ) {
+            if ( bImagesGood ) {
+                treeNode.setGraphic(new ImageView(folderExpandImage));
+                printSysOut("PathSomeToSome - folder Graphic set");
+            }
             GetTreeChildren( treeNode );
         }
         /*

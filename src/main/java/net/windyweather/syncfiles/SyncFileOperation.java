@@ -24,8 +24,12 @@ import java.util.Objects;
     Woops. I forgot verify copy, and verify not copied.
  */
 public class SyncFileOperation extends TreeItem<String> {
-    public SyncFileOperation() {
 
+    /*
+        This constructor never used
+     */
+    public SyncFileOperation() {
+        //SetUpImages();
     }
 
     /*
@@ -51,11 +55,34 @@ public class SyncFileOperation extends TreeItem<String> {
     public String Status;
 
 
+    public static boolean bImagesGood = false;
+    public static boolean bImagesTried = false;
+    public static Image folderCollapseImage;
+    public static Image folderExpandImage;
+    public static Image fileImage;
+
+
     /*
-    public static Image folderCollapseImage = new Image(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("net.windyweather.synchtestgui/File_Folder.svg")));
-    public static Image folderExpandImage = new Image(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("net.windyweather.synchtestgui/File_Folder-open.svg")));
-    public static Image fileImage = new Image(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("net.windyweather.synchtestgui/File_Text-x-generic.svg")));
-    */
+        Read in the images for the tree
+     */
+    private void SetUpImages() {
+
+        if ( !bImagesGood && bImagesTried ) {
+            return;
+        }
+        bImagesTried = true;
+        try {
+
+            folderExpandImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("File_Folder-open.svg")) );
+            folderExpandImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("File_Folder-open.svg")));
+            fileImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("File_Text-x-generic.svg")));
+
+            printSysOut("Tree Images Found");
+            bImagesGood = true;
+        } catch (Exception e) {
+            printSysOut("Tree Images Failed");
+        }
+    }
 
     private void printSysOut( String str ) {
         System.out.println( str );
@@ -83,6 +110,7 @@ public class SyncFileOperation extends TreeItem<String> {
 
     public SyncFileOperation(Path file) {
 
+        //SetUpImages();
         //super(file.toString());
         this.fullPath = file.toString();
         sSourcePath = fullPath;
@@ -96,13 +124,19 @@ public class SyncFileOperation extends TreeItem<String> {
         if (Files.isDirectory(file)) {
             this.isDirectory = true;
             intSize = 0;
-            //this.setGraphic(new ImageView(folderCollapseImage));
+            if ( bImagesGood ) {
+                //super.setGraphic(new ImageView(folderExpandImage));
+                printSysOut("SyncFileOperation - folder Graphic set");
+            }
         } else {
             this.isDirectory = false;
             File aFUckingFile = new File(file.toString());
             intSize = (int)aFUckingFile.length();
-            //this.setGraphic(new ImageView(fileImage));
-            //if you want different icons for different file types this is where you'd do it
+            if ( bImagesGood ) {
+                //super.setGraphic(new ImageView(fileImage));
+                printSysOut("SyncFileOperation - file Graphic set");
+            }
+
         }
 
         sOperation = SFO_COPY;
