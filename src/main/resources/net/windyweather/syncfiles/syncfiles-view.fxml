@@ -121,7 +121,7 @@
                 </HBox>
                 <VBox>
                     <children>
-                        <TabPane prefHeight="350.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+                        <TabPane fx:id="tabPairPane" prefHeight="350.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
                             <tabs>
                                 <Tab text="Pair Name">
                                     <content>
@@ -337,7 +337,7 @@
                                         <Insets left="100.0" />
                                     </HBox.margin>
                                 </Label>
-                                <Button alignment="CENTER_RIGHT" mnemonicParsing="false" text="Stop">
+                                <Button fx:id="btnStop" alignment="CENTER_RIGHT" mnemonicParsing="false" text="Stop">
                                     <HBox.margin>
                                         <Insets left="20.0" />
                                     </HBox.margin>
@@ -352,22 +352,22 @@
                         </HBox>
                         <HBox prefHeight="100.0" prefWidth="200.0">
                             <children>
-                                <Button mnemonicParsing="false" text="Delete Selected Source Files">
+                                <Button fx:id="btnDeleteSelectedSource" mnemonicParsing="false" text="Delete Selected Source Files">
                                     <HBox.margin>
                                         <Insets left="10.0" />
                                     </HBox.margin>
                                 </Button>
-                                <Button layoutX="20.0" layoutY="10.0" mnemonicParsing="false" text="Copy All Source">
+                                <Button fx:id="btnCopyAllSource" layoutX="20.0" layoutY="10.0" mnemonicParsing="false" text="Copy All Source">
                                     <HBox.margin>
                                         <Insets left="10.0" />
                                     </HBox.margin>
                                 </Button>
-                                <Button layoutX="90.0" layoutY="10.0" mnemonicParsing="false" text="Copy Selected Source">
+                                <Button fx:id="btnCopySelectedSource" layoutX="90.0" layoutY="10.0" mnemonicParsing="false" text="Copy Selected Source">
                                     <HBox.margin>
                                         <Insets left="10.0" />
                                     </HBox.margin>
                                 </Button>
-                                <Button layoutX="166.0" layoutY="10.0" mnemonicParsing="false" onAction="#OnUpdatePair" text=" Update Pair">
+                                <Button fx:id="btnUpdatePair" layoutX="166.0" layoutY="10.0" mnemonicParsing="false" onAction="#OnUpdatePair" text=" Update Pair">
                                     <HBox.margin>
                                         <Insets left="10.0" />
                                     </HBox.margin>

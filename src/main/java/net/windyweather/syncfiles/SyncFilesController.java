@@ -16,10 +16,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.Window;
-import javafx.stage.WindowEvent;
+import javafx.stage.*;
 import javafx.util.Callback;
 
 import java.beans.XMLDecoder;
@@ -42,9 +39,10 @@ import static net.windyweather.syncfiles.SyncFilesApp.*;
 public class SyncFilesController {
 
 
+
     /*
-             Define the list that the TableView will watch
-         */
+        Define the list that the TableView will watch
+    */
     ObservableList<SyncFilesPair> pairObservableList = FXCollections.observableArrayList();
 
     public SplitPane splitPaneOutsideContainer;
@@ -57,6 +55,9 @@ public class SyncFilesController {
     public TreeTableColumn<SyncFileOperation, Integer> tcFileSize;
     public TreeTableColumn<SyncFileOperation, String> tcActionPending;
     public TreeTableColumn<SyncFileOperation, String> tcStatus;
+
+
+    public TabPane tabPairPane;
 
     public TextField txtPairName;
     public CheckBox chkExcludeFileTypes;
@@ -76,7 +77,11 @@ public class SyncFilesController {
     public Label lblOperations;
     public Label lblProgress;
 
-
+    public Button btnDeleteSelectedSource;
+    public Button btnCopyAllSource;
+    public Button btnCopySelectedSource;
+    public Button btnUpdatePair;
+    public Button btnStop;
     /*
         Directory for storing settings, including Pairs in XML file
      */
@@ -201,7 +206,11 @@ public class SyncFilesController {
 
 
     @FXML
-    /*
+
+
+
+
+      /*
         Called to initialize the controller
      */
     void initialize() throws FileNotFoundException {
@@ -299,8 +308,39 @@ public class SyncFilesController {
         tcActionPending.setStyle("-fx-alignment: CENTER;");
         tcStatus.setStyle("-fx-alignment: CENTER;");
 
+        /*
+            Disable the Pair details since no pair is open
+         */
+        DisablePairDetails();
+
 
     } // end of SetUpStuff
+
+    void DisablePairDetails(){
+        tabPairPane.setDisable(true);
+
+        btnDeleteSelectedSource.setDisable(true);
+        btnCopyAllSource.setDisable(true);
+        btnCopySelectedSource.setDisable(true);
+        btnUpdatePair.setDisable(true);
+        btnStop.setDisable(true);
+        btnOneToTwo.setDisable(true);
+        btnTwoToOne.setDisable(true);
+    }
+
+    void EnablePairDetails() {
+        tabPairPane.setDisable( false );
+
+        btnDeleteSelectedSource.setDisable(false);
+        btnCopyAllSource.setDisable(false);
+        btnCopySelectedSource.setDisable(false);
+        btnUpdatePair.setDisable(false);
+        btnStop.setDisable(false);
+        btnOneToTwo.setDisable(false);
+        btnTwoToOne.setDisable(false);
+    }
+
+
 
     /*
     break out the close stuff here so we can call it from two places
@@ -368,7 +408,7 @@ public class SyncFilesController {
      */
     private void ANewPair() {
 
-        SyncFilesPair aPair = new SyncFilesPair( "New Pair", "none");
+        SyncFilesPair aPair = new SyncFilesPair( "New Pair", "closed");
 
         String sName = aPair.sPairName.getValue();
         printSysOut(String.format("String.valueOf(aPair.sPairName) : %s", sName));
@@ -394,16 +434,16 @@ public class SyncFilesController {
 
         SyncFilesPair[] somePairs =
                 {
-                new SyncFilesPair( "1st Pair", "</string>"),
-                new SyncFilesPair( "2nd Pair", "none"),
-                new SyncFilesPair( "3rd Pair", "none"),
-                new SyncFilesPair( "4th Pair", "none"),
-                new SyncFilesPair( "5th Pair", "none"),
-                new SyncFilesPair( "6th Pair", "<none>"),
-                new SyncFilesPair( "7th Pair", "none"),
-                new SyncFilesPair( "8th Pair", "none"),
-                new SyncFilesPair( "9th Pair", "none"),
-                new SyncFilesPair( "10th Pair", "none")
+                new SyncFilesPair( "1st Pair", "closed"),
+                new SyncFilesPair( "2nd Pair", "closed"),
+                new SyncFilesPair( "3rd Pair", "closed"),
+                new SyncFilesPair( "4th Pair", "closed"),
+                new SyncFilesPair( "5th Pair", "closed"),
+                new SyncFilesPair( "6th Pair", "closed"),
+                new SyncFilesPair( "7th Pair", "closed"),
+                new SyncFilesPair( "8th Pair", "closed"),
+                new SyncFilesPair( "9th Pair", "closed"),
+                new SyncFilesPair( "10th Pair", "closed")
                 };
 
         int idx = 0;
@@ -419,6 +459,7 @@ public class SyncFilesController {
             aPair.bVerifyNotCopied = new SimpleBooleanProperty( (idx % 7) == 0 );
             aPair.bRecoverVerifyFailure = new SimpleBooleanProperty( (idx % 9) == 0 );
             aPair.bOverrideReadOnly = new SimpleBooleanProperty( (idx % 8) == 0 );
+            aPair.sLastSyncDateTime = new SimpleStringProperty("");
 
             idx++;
 
@@ -463,6 +504,9 @@ public class SyncFilesController {
         Did the user screw up and leave unsaved changes in the GUI?
      */
     private boolean OpenPairUnsavedChanges() {
+        if (theOpenPair == null ) {
+            return false;
+        }
 
         if ( ( theOpenPair.sPairName.getValue().equals(txtPairName.getText() ) ) &&
                 ( theOpenPair.bOverrideReadOnly.getValue() == chkOverrideReadOnly.isSelected() ) &&
@@ -531,6 +575,7 @@ public class SyncFilesController {
             Clear the operation tree too
          */
         ClearOperationTree();
+        EnablePairDetails();
         setStatus("Pair Opened");
     }
 
@@ -561,17 +606,12 @@ public class SyncFilesController {
      */
     private void ClearOperationTree() {
 
-        //SyncFileOperation root = new SyncFileOperation(Path.of(""));
-        //TreeItem<SyncFileOperation> treeNode = new TreeItem<> ();
-        //treeNode.setExpanded(false);
-
         tvFileTree.setRoot( null );
-
 
         lblProgress.setText("");
         lblOperations.setText("");
         lblTotalBytes.setText("");
-        lblLastSyncDateTime.setText("");
+        //lblLastSyncDateTime.setText("");
 
     }
 
@@ -611,7 +651,7 @@ public class SyncFilesController {
 
         if ( idx == 0 ) {
             setStatus( "Already First");
-            printSysOut("OnPairMoveUp - already at top");
+            //printSysOut("OnPairMoveUp - already at top");
             return;
         }
         SyncFilesPair aPair = pairObservableList.get(idx);
@@ -629,12 +669,12 @@ public class SyncFilesController {
         }
         if ( (idx+1) == pairObservableList.size() ) {
             // already at bottom so we are done
-            printSysOut(String.format("OnMovePairDown - idx %d already at bottom", idx ) );
+            //printSysOut(String.format("OnMovePairDown - idx %d already at bottom", idx ) );
             SelectAndFocusIndex(idx);
             setStatus("Already Last");
             return;
         }
-        printSysOut(String.format("OnMovePairDown - moving idx %d Down one item", idx ) );
+        //printSysOut(String.format("OnMovePairDown - moving idx %d Down one item", idx ) );
         SyncFilesPair pair = pairObservableList.get(idx);
         pairObservableList.remove(idx);
         pairObservableList.add( idx+1, pair);
@@ -651,10 +691,10 @@ public class SyncFilesController {
         }
         if ( idx == 0 ) {
             setStatus( "Already First");
-            printSysOut("OnPairMoveTop - already first");
+            //printSysOut("OnPairMoveTop - already first");
             return;
         }
-        printSysOut(String.format("OnMovePairTop - moving idx %d to first", idx ) );
+        //printSysOut(String.format("OnMovePairTop - moving idx %d to first", idx ) );
         SyncFilesPair pair = pairObservableList.get(idx);
         pairObservableList.remove(idx);
         pairObservableList.addFirst(pair );
@@ -671,7 +711,7 @@ public class SyncFilesController {
 
         if ( idx == (num-1) ) {
             setStatus( "Already Last");
-            printSysOut("OnPairMoveBottom - already last");
+            //printSysOut("OnPairMoveBottom - already last");
             return;
         }
         SyncFilesPair aPair = pairObservableList.get(idx);
@@ -714,6 +754,8 @@ public class SyncFilesController {
              */
             ClearPairGui();
             ClearOperationTree();
+            lblLastSyncDateTime.setText("");
+            DisablePairDetails();
             theOpenPair = null;
         }
         /*
@@ -803,27 +845,65 @@ public class SyncFilesController {
 
 
 
-
+    /*
+        One To Two or Two To One
+     */
     public void OnPairOneToTwo(ActionEvent actionEvent) {
-
 
         printSysOut("OnPairOneToTwo");
 
+        String sSource = txtFilePathOne.getText();
+        String sDest = txtFilePathTwo.getText();
+        setStatus("");
+        PathSomeToSome( actionEvent, sSource, sDest );
+        /*
+            if the status is set, leave it alone, else
+            just say we are done
+         */
+        if ( lblStatus.getText().isBlank() ) {
+            setStatus("One to Two Complete");
+        }
+
+    }
+
+
+    public void OnPairTwoToOne(ActionEvent actionEvent) {
+        printSysOut("OnPairTwoToOne");
+
+        String sSource = txtFilePathTwo.getText();
+        String sDest = txtFilePathOne.getText();
+        setStatus("");
+        PathSomeToSome( actionEvent, sSource, sDest );
+        /*
+            if the status is set, leave it alone, else
+            just say we are done
+         */
+        if ( lblStatus.getText().isBlank() ) {
+            setStatus("Two to One Complete");
+        }
+    }
+
+    /*
+        Do either OneToTwo or TwoToOne here
+     */
+    private void PathSomeToSome( ActionEvent actionEvent, String sSourcePath, String sDestPath ) {
         longTotalBytes = 0L;
         intOperations = 0;
 
-
         /*
-            Load up the tree starting with the path in the PathOne
+            Load up the tree starting with the source path
          */
-        File aFile = new File( txtFilePathOne.getText() );
-        Path pathPathOne = aFile.toPath();
+        File aFile = new File( sSourcePath );
+        Path pathPathSrc = aFile.toPath();
 
         if ( !aFile.exists() ) {
             // nowhere....
+            printSysOut(String.format("PairSomeToSome - Path broken? %s", sSourcePath ));
+            setStatus("Source Path Problem");
+            return;
         }
 
-        SyncFileOperation root = new SyncFileOperation(pathPathOne);
+        SyncFileOperation root = new SyncFileOperation(pathPathSrc);
         TreeItem<SyncFileOperation> treeNode = new TreeItem<> (root);
         treeNode.setExpanded(true);
 
@@ -849,13 +929,10 @@ public class SyncFilesController {
             Just update the pair to save sync data
          */
         OnUpdatePair( actionEvent );
-        setStatus("1 >> 2 complete");
+        setStatus("");  // No status, so caller can set
 
     }
 
-    public void OnPairTwoToOne(ActionEvent actionEvent) {
-        printSysOut("OnPairTwoToOne");
-    }
 
     public void OnSavePairs(ActionEvent actionEvent) {
         SavePairsList();
@@ -863,14 +940,67 @@ public class SyncFilesController {
     }
 
 
+    /*
+        Put up directory chooser for path one or two
+     */
+
+    /*
+     Use directoryChooser dialogs launched from stage.
+  */
+    public String ChooseAPath(String sChooseTitle, String sStartingPath) {
+        /*
+            Get a path based on the last path we've seen
+         */
+        Stage stage = (Stage) txtFilePathOne.getScene().getWindow();
+        DirectoryChooser dirChooser = new DirectoryChooser();
+        dirChooser.setTitle(sChooseTitle);
+        if (!sStartingPath.isBlank()) {
+            File aFile = new File(sStartingPath);
+            // do we have a valid path to a folder here?
+            if (aFile.isDirectory()) {
+                dirChooser.setInitialDirectory(aFile);
+            }
+        }
+        /*
+           We either set the initial path if we had one
+           or we'll just go in blind and let the user
+           navigate where he/she wants.
+           Launch the chooser dialog and then stuff
+           the result into the source path
+       */
+        File selDir = dirChooser.showDialog(( stage ));
+        /*
+            make sure we got something back otherwise just ignore it
+         */
+        if ( selDir != null ) {
+            return selDir.getAbsolutePath();
+        } else {
+            return "";
+        }
+    }
+
     public void OnClickFilePathOne(ActionEvent actionEvent) {
-        txtFilePathOne.setText("D:\\zzSSATest\\BunchOfImages");
+        //txtFilePathOne.setText("D:\\zzSSATest\\BunchOfImages");
+        String sPath = ChooseAPath("Choose Path One", txtFilePathOne.getText() );
+        if ( sPath.isBlank() ) {
+            setStatus("No Path Chosen");
+        } else {
+            txtFilePathOne.setText( sPath );
+            setStatus("Path One Set");
+        }
 
     }
 
 
     public void OnClickFilePathTwo(ActionEvent actionEvent) {
-        txtFilePathTwo.setText("D:\\zzSSATest\\SourceTest\\Stuff Here\\Stuff_2024_12_01_11_06_41_327.png");
+        //txtFilePathTwo.setText("D:\\zzSSATest\\SourceTest\\Stuff Here\\Stuff_2024_12_01_11_06_41_327.png");
+        String sPath = ChooseAPath("Choose Path Two", txtFilePathTwo.getText() );
+        if ( sPath.isBlank() ) {
+            setStatus("No Path Chosen");
+        } else {
+            txtFilePathTwo.setText( sPath );
+            setStatus("Path Two Set");
+        }
 
     }
 
