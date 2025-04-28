@@ -89,6 +89,8 @@ public class SyncFilesController {
      */
     private String sWindyWeatherDir;
     private String sXMLPairsListPath;
+    private String sXMLSplitPaneDividers;
+    private String sXMLGuiStuffToSave;
 
     @FXML
     protected void onHelloButtonClick() {
@@ -99,6 +101,16 @@ public class SyncFilesController {
     private int intOperations;
 
     private SyncFilesPair theOpenPair;
+
+    /*
+        Stuff we are saving for the GUI.
+     */
+    private static class GuiStuffToSave {
+
+        double[] dSplitPaneDividers;
+        double[] dPairTableColumnWidths;
+        double[] dTreeTableColumnWidths;
+    }
 
     public SyncFilesController() {};
 
@@ -147,6 +159,115 @@ public class SyncFilesController {
         System.out.println(str);
     }
 
+
+    /*
+        Save / restore the GUI settings
+     */
+    private void SaveGuiSettings() {
+        try{
+            printSysOut("SaveGuiSettings: make object to store ");
+            GuiStuffToSave guiStuffToSave = new GuiStuffToSave();
+
+            guiStuffToSave.dSplitPaneDividers = new double[]{0,0};
+            guiStuffToSave.dSplitPaneDividers = splitPaneOutsideContainer.getDividerPositions();
+            guiStuffToSave.dPairTableColumnWidths = new double[]{0, 0};
+            guiStuffToSave.dTreeTableColumnWidths = new double[]{0,0,0,0};
+
+            guiStuffToSave.dPairTableColumnWidths[0] = tcPathPair.getWidth();
+            guiStuffToSave.dPairTableColumnWidths[1] = tcPairStatus.getWidth();
+
+            guiStuffToSave.dTreeTableColumnWidths[0] = tcSourcePath.getWidth();
+            guiStuffToSave.dTreeTableColumnWidths[1] = tcFileSize.getWidth();
+            guiStuffToSave.dTreeTableColumnWidths[2] = tcActionPending.getWidth();
+            guiStuffToSave.dTreeTableColumnWidths[3] = tcStatus.getWidth();
+
+            XMLEncoder encoder = null;
+
+            printSysOut("SaveGuiSettings: ready to encode ");
+            encoder=new XMLEncoder(new BufferedOutputStream(new FileOutputStream( sXMLGuiStuffToSave)));
+            assert encoder != null;
+            encoder.writeObject( guiStuffToSave );
+            encoder.close();
+            printSysOut("SaveGuiSettings: stored ");
+
+        }catch( Exception e ){
+            printSysOut( String.format("SaveGuiSettings: ERROR While saving to xml file %s", sXMLGuiStuffToSave) );
+        }
+    }
+
+    private void RestoreGuiSettings() {
+        // Use XMLDecoder to read the XML file in.
+
+        GuiStuffToSave guiStuffToSave;
+
+        try {
+            printSysOut("RestoreGuiSettings");
+            final XMLDecoder decoder = new XMLDecoder(new FileInputStream(sXMLGuiStuffToSave));
+            guiStuffToSave = ( GuiStuffToSave ) decoder.readObject();
+            decoder.close();
+            printSysOut("RestoreGuiSettings restored");
+            splitPaneOutsideContainer.setDividerPosition(0, guiStuffToSave.dSplitPaneDividers[0]);
+
+            tcPathPair.prefWidthProperty().setValue( guiStuffToSave.dPairTableColumnWidths[0]);
+            tcStatus.prefWidthProperty().setValue( guiStuffToSave.dPairTableColumnWidths[1]);
+            tcSourcePath.prefWidthProperty().setValue( guiStuffToSave.dTreeTableColumnWidths[0]);
+            tcFileSize.prefWidthProperty().setValue( guiStuffToSave.dTreeTableColumnWidths[1]);
+            tcActionPending.prefWidthProperty().setValue( guiStuffToSave.dTreeTableColumnWidths[2]);
+            tcStatus.prefWidthProperty().setValue( guiStuffToSave.dTreeTableColumnWidths[3]);
+
+
+            printSysOut("RestorePairsList Gui Stuff restored" );
+        } catch (Exception e) {
+            printSysOut("RestorePairsList Gui Stuff Not Restored ");
+        }
+    }
+
+
+
+    /*
+        Save and restore the SplitPane dividers. Actually there is only one.
+        Downside of using XML is that it looks like we need a separate file for each kind
+        of thing to be saved/restored
+     */
+    private void RestoreSplitPaneDividers() {
+        // Use XMLDecoder to read the XML file in.
+
+        double[] dSplitPaneDividers = {0,0,0,0,0,0};
+        try {
+            printSysOut("RestoreSplitPaneDividers");
+            final XMLDecoder decoder = new XMLDecoder(new FileInputStream(sXMLSplitPaneDividers));
+            dSplitPaneDividers = (double[] )decoder.readObject();
+            decoder.close();
+            printSysOut(String.format("%d Dividers restored %s", dSplitPaneDividers.length, Arrays.toString(dSplitPaneDividers)));
+            splitPaneOutsideContainer.setDividerPosition(0, dSplitPaneDividers[0]);
+            printSysOut(String.format("RestorePairsList %d pairs restored", dSplitPaneDividers.length ));
+        } catch (Exception e) {
+            printSysOut("SplitPane dividers Not Restored ");
+        }
+    }
+
+
+    /*
+        Save the splitpane divider position
+     */
+    private void SaveSplitPaneDividers() {
+        double[] dDividerPositions = splitPaneOutsideContainer.getDividerPositions();
+
+        XMLEncoder encoder = null;
+
+        try{
+            encoder=new XMLEncoder(new BufferedOutputStream(new FileOutputStream( sXMLSplitPaneDividers )));
+            assert encoder != null;
+            encoder.writeObject( dDividerPositions );
+            encoder.close();
+            printSysOut( String.format("SaveSplitPaneDividers: stored %d dividers %s to %s", dDividerPositions.length,
+                    Arrays.toString(dDividerPositions),sXMLSplitPaneDividers));
+
+        }catch( Exception e ){
+            printSysOut( String.format("SaveSplitPaneDividers: ERROR While saving to xml file %s", sXMLSplitPaneDividers) );
+        }
+
+    }
     /*
         Save and Restore SyncFilesPair from pairObservableList to XML
      */
@@ -270,9 +391,24 @@ public class SyncFilesController {
             Setup the pairs list file path
          */
         sXMLPairsListPath = sWindyWeatherDir + File.separator + "SyncFilesPairsList.xml";
+        sXMLSplitPaneDividers = sWindyWeatherDir + File.separator + "SyncFilesSplitPaneDividers.xml";
+        sXMLGuiStuffToSave = sWindyWeatherDir + File.separator + "SyncFilesGuiStuffToSave.xml";
 
+        /*
+            Restore the pairs and the split pane divider
+         */
         RestorePairsList();
 
+
+        /*
+            Apparently we have to run this Later.
+         */
+        javafx.application.Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                RestoreGuiSettings();
+            }
+        });
 
 
         chkIncludeSubfolders.setSelected( true );
@@ -367,6 +503,10 @@ public class SyncFilesController {
          */
         SavePairsList();
         //setStatus("Pairs Saved");
+        /*
+        Save the GUI settings
+        */
+        SaveGuiSettings();
 
         printSysOut("AppCloseStuffToDo: Save Window Pos/Size");
 
@@ -380,6 +520,8 @@ public class SyncFilesController {
             Call the shiny new Window XML Save
          */
         WindowSaveRestore.SaveWindowPosSize( stage );
+
+
 
 
     }
@@ -829,6 +971,7 @@ public class SyncFilesController {
         } catch (Exception e) {
             printSysOut("Tree Images Failed");
         }
+        bImagesGood = false; // turn off images for now
     }
 
 
