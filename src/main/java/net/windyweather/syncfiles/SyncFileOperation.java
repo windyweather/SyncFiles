@@ -115,7 +115,7 @@ public class SyncFileOperation extends TreeItem<String> {
         this.fullPath = file.toString();
         sSourcePath = fullPath;
         sName = String.valueOf(file.getFileName());
-        printSysOut("SyncFileOperation - :"+ sName+ ":"+sSourcePath);
+        //printSysOut("SyncFileOperation - :"+ sName+ ":"+sSourcePath);
 
         sDestinationPath = "None here yet";
 

@@ -979,8 +979,23 @@ public class SyncFilesController {
 
         String[] saIncludeEverything = new String[]{"*.*", "*"};
 
+        /*
+            Set up the exclude list
+         */
+        String[] saExcludeList = new String[]{};
+        if ( chkExcludeFileTypes.isSelected() && !txtExcludeFileTypes.getText().isBlank() ) {
+            String regex = "[;]";
+            saExcludeList = txtExcludeFileTypes.getText().split(regex);
+            if ( saExcludeList.length != 0 ) {
+                for ( int i=0; i< saExcludeList.length; i++ ) {
+                    saExcludeList[i] = "*."+saExcludeList[i];
+                }
+            }
+        }
+
         DirectoryScanner scanner = new DirectoryScanner();
         scanner.setIncludes(saIncludeEverything);
+        scanner.setExcludes( saExcludeList );
         scanner.setCaseSensitive(false);
         scanner.setBasedir(new File(sPath));
         scanner.scan();
@@ -1124,6 +1139,10 @@ public class SyncFilesController {
         intOperations++;
         /*
             If the root is a folder, then scan it all the way down
+            Actually, root has to be a directory. Unless the user
+            types in a file herself.
+            We are going to ignore the case that the root is
+            an "Excluded" file type.
          */
         if ( root.isDirectory() ) {
             if ( bImagesGood ) {
