@@ -7,12 +7,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import net.windyweather.syncfiles.SyncFilesController;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.Objects;
 
 import static java.awt.event.WindowEvent.WINDOW_ACTIVATED;
 import static javafx.stage.WindowEvent.*;
@@ -37,6 +40,7 @@ public class AboutDialog {
             "More details later\n\n",
             "See more at the link below:"
             };
+    public ImageView imgView;
 
 
     /*
@@ -54,6 +58,9 @@ public class AboutDialog {
         taAboutText.setEditable( false );
         taAboutText.deselect();
         taAboutText.home();
+
+        Image imgIcon = new Image(Objects.requireNonNull(getClass().getResourceAsStream("sync-icon-flip-240.png")) );
+        imgView.setImage( imgIcon );
     }
 
     /*
