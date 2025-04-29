@@ -102,16 +102,6 @@ public class SyncFilesController {
 
     private SyncFilesPair theOpenPair;
 
-    /*
-        Stuff we are saving for the GUI.
-     */
-    private static class GuiStuffToSave {
-
-        double[] dSplitPaneDividers;
-        double[] dPairTableColumnWidths;
-        double[] dTreeTableColumnWidths;
-    }
-
     public SyncFilesController() {};
 
     /*
@@ -166,20 +156,18 @@ public class SyncFilesController {
     private void SaveGuiSettings() {
         try{
             printSysOut("SaveGuiSettings: make object to store ");
-            GuiStuffToSave guiStuffToSave = new GuiStuffToSave();
+            SyncFilesGuiStuffToSave guiStuffToSave = new SyncFilesGuiStuffToSave();
+            double[] spDividers = splitPaneOutsideContainer.getDividerPositions().clone();
 
-            guiStuffToSave.dSplitPaneDividers = new double[]{0,0};
-            guiStuffToSave.dSplitPaneDividers = splitPaneOutsideContainer.getDividerPositions();
-            guiStuffToSave.dPairTableColumnWidths = new double[]{0, 0};
-            guiStuffToSave.dTreeTableColumnWidths = new double[]{0,0,0,0};
+            guiStuffToSave.setDSplitDivider( spDividers[0] );
 
-            guiStuffToSave.dPairTableColumnWidths[0] = tcPathPair.getWidth();
-            guiStuffToSave.dPairTableColumnWidths[1] = tcPairStatus.getWidth();
+            guiStuffToSave.setDPairTableNameWidth( tcPathPair.getWidth() );
+            guiStuffToSave.setDPairTableStatusWidth( tcPairStatus.getWidth() );
 
-            guiStuffToSave.dTreeTableColumnWidths[0] = tcSourcePath.getWidth();
-            guiStuffToSave.dTreeTableColumnWidths[1] = tcFileSize.getWidth();
-            guiStuffToSave.dTreeTableColumnWidths[2] = tcActionPending.getWidth();
-            guiStuffToSave.dTreeTableColumnWidths[3] = tcStatus.getWidth();
+            guiStuffToSave.setDTreeTableWidth0( tcSourcePath.getWidth() );
+            guiStuffToSave.setDTreeTableWidth1( tcFileSize.getWidth() );
+            guiStuffToSave.setDTreeTableWidth2( tcActionPending.getWidth() );
+            guiStuffToSave.setDTreeTableWidth3( tcStatus.getWidth() );
 
             XMLEncoder encoder = null;
 
@@ -191,34 +179,35 @@ public class SyncFilesController {
             printSysOut("SaveGuiSettings: stored ");
 
         }catch( Exception e ){
-            printSysOut( String.format("SaveGuiSettings: ERROR While saving to xml file %s", sXMLGuiStuffToSave) );
+            printSysOut( String.format("SaveGuiSettings: ERROR While saving to xml file %s %s", sXMLGuiStuffToSave, e.toString() ) );
         }
     }
 
     private void RestoreGuiSettings() {
         // Use XMLDecoder to read the XML file in.
 
-        GuiStuffToSave guiStuffToSave;
+        SyncFilesGuiStuffToSave guiStuffToSave = new SyncFilesGuiStuffToSave();
 
         try {
             printSysOut("RestoreGuiSettings");
             final XMLDecoder decoder = new XMLDecoder(new FileInputStream(sXMLGuiStuffToSave));
-            guiStuffToSave = ( GuiStuffToSave ) decoder.readObject();
+            guiStuffToSave = ( SyncFilesGuiStuffToSave ) decoder.readObject();
             decoder.close();
-            printSysOut("RestoreGuiSettings restored");
-            splitPaneOutsideContainer.setDividerPosition(0, guiStuffToSave.dSplitPaneDividers[0]);
-
-            tcPathPair.prefWidthProperty().setValue( guiStuffToSave.dPairTableColumnWidths[0]);
-            tcStatus.prefWidthProperty().setValue( guiStuffToSave.dPairTableColumnWidths[1]);
-            tcSourcePath.prefWidthProperty().setValue( guiStuffToSave.dTreeTableColumnWidths[0]);
-            tcFileSize.prefWidthProperty().setValue( guiStuffToSave.dTreeTableColumnWidths[1]);
-            tcActionPending.prefWidthProperty().setValue( guiStuffToSave.dTreeTableColumnWidths[2]);
-            tcStatus.prefWidthProperty().setValue( guiStuffToSave.dTreeTableColumnWidths[3]);
+            printSysOut("RestoreGuiSettings read from XML file");
+            splitPaneOutsideContainer.setDividerPosition(0, guiStuffToSave.getDSplitDivider() );
+            printSysOut("RestoreGuiSettings - SP divider Set");
+            tcPathPair.prefWidthProperty().setValue( guiStuffToSave.getDPairTableNameWidth() );
+            tcStatus.prefWidthProperty().setValue( guiStuffToSave.getDPairTableStatusWidth() );
+            printSysOut("RestoreGuiSettings - Pair Table Columns Set");
+            tcSourcePath.prefWidthProperty().setValue( guiStuffToSave.getDTreeTableWidth0() );
+            tcFileSize.prefWidthProperty().setValue( guiStuffToSave.getDTreeTableWidth1() );
+            tcActionPending.prefWidthProperty().setValue( guiStuffToSave.getDTreeTableWidth2() );
+            tcStatus.prefWidthProperty().setValue( guiStuffToSave.getDTreeTableWidth3() );
 
 
             printSysOut("RestorePairsList Gui Stuff restored" );
         } catch (Exception e) {
-            printSysOut("RestorePairsList Gui Stuff Not Restored ");
+            printSysOut(String.format("RestorePairsList Gui Stuff Not Restored %s", e.toString()) );
         }
     }
 
