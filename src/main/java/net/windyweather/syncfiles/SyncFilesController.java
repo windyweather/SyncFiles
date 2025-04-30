@@ -33,6 +33,7 @@ import java.util.*;
 import org.codehaus.plexus.util.DirectoryScanner;
 
 
+import static net.windyweather.syncfiles.SyncFileOperation.SFO_PEND;
 import static net.windyweather.syncfiles.SyncFilesApp.*;
 
 /*
@@ -423,6 +424,11 @@ public class SyncFilesController {
             }
         });
 
+
+        /*
+            Tree selection model to multiple
+         */
+        tvFileTree.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
        /*
             Property Value Factories for Tree Columns
          */
@@ -509,9 +515,6 @@ public class SyncFilesController {
             Call the shiny new Window XML Save
          */
         WindowSaveRestore.SaveWindowPosSize( stage );
-
-
-
 
     }
 
@@ -641,7 +644,7 @@ public class SyncFilesController {
         stage.setResizable(false);
         stage.initOwner( stageOfUs );
 
-                /*
+        /*
             Stick a program icon on the window
          */
         try {
@@ -968,7 +971,7 @@ public class SyncFilesController {
         Recursively look through the source and find all the files
      */
 
-    private void GetTreeChildren( TreeItem<SyncFileOperation> treeNode ) {
+    private void GetTreeChildren( TreeItem<SyncFileOperation> treeNode, String sSourcePath, String sDestinationPath ) {
         /*
             Get the children of this node, then for each that is a folder,
             this again to get their children. Expand the whole tree.
@@ -1013,13 +1016,13 @@ public class SyncFilesController {
             Path pDeeperPath = new File(sDeeperPath).toPath();
 
             //printSysOut("GetTreeChildren Add File : " + sDeeperPath);
-            SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath);
+            SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath, sSourcePath, sDestinationPath);
             TreeItem<SyncFileOperation> deepNode = new TreeItem<>(sfoDeeper);
             if ( bImagesGood ) {
                 deepNode.setGraphic(new ImageView(fileImage));
                 printSysOut("PathSomeToSome - file Graphic set");
             }
-            longTotalBytes += sfoDeeper.getIntSize();
+            longTotalBytes += sfoDeeper.getFileSize();
             intOperations++;
 
             treeNode.getChildren().add(deepNode);
@@ -1043,7 +1046,7 @@ public class SyncFilesController {
             Path pDeeperPath = new File(sDeeperPath).toPath();
 
             //printSysOut("GetTreeChildren Add Directory : " + sDeeperPath);
-            SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath);
+            SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath, sSourcePath, sDestinationPath);
 
             TreeItem<SyncFileOperation> deepNode = new TreeItem<>(sfoDeeper);
             deepNode.setExpanded(true);
@@ -1060,7 +1063,7 @@ public class SyncFilesController {
              */
             intOperations++;
 
-            GetTreeChildren(deepNode);
+            GetTreeChildren(deepNode, sSourcePath, sDestinationPath);
         }
     }
 
@@ -1126,7 +1129,7 @@ public class SyncFilesController {
             return;
         }
 
-        SyncFileOperation root = new SyncFileOperation(pathPathSrc);
+        SyncFileOperation root = new SyncFileOperation(pathPathSrc, sSourcePath, sDestPath);
         TreeItem<SyncFileOperation> treeNode = new TreeItem<> (root);
         treeNode.setExpanded(true);
         if ( bImagesGood ) {
@@ -1135,8 +1138,7 @@ public class SyncFilesController {
         }
 
         tvFileTree.setRoot( treeNode );
-        longTotalBytes += root.getIntSize();
-        intOperations++;
+        longTotalBytes += root.getFileSize();
         /*
             If the root is a folder, then scan it all the way down
             Actually, root has to be a directory. Unless the user
@@ -1149,7 +1151,7 @@ public class SyncFilesController {
                 treeNode.setGraphic(new ImageView(folderExpandImage));
                 printSysOut("PathSomeToSome - folder Graphic set");
             }
-            GetTreeChildren( treeNode );
+            GetTreeChildren( treeNode, sSourcePath, sDestPath );
         }
         /*
             Put a readable size in the display

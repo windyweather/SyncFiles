@@ -38,19 +38,21 @@ public class SyncFileOperation extends TreeItem<String> {
     static final String SFO_COPY = "COPY";
     static final String SFO_COPY_VERIFY = "COPY/VERIFY";
     static final String SFO_VERIFY_NOCOPY = "VERIFY ONLY";
+    static final String SFO_NONE = "NONE";
     /*
         Status Constants
      */
-    static final String SFO_PEND = "PENDING";
-    static final String SFO_COPIED = "COPIED";
-    static final String SFO_COPYVERIFY = "COPIED/VERIFIED";
-    static final String SFO_VERFIED = "VERIFIED";
-    static final String SFO_RECOVERED = "RECOVERED";
+    static public final String SFO_PEND = "PENDING";
+    static public final String SFO_COPIED = "COPIED";
+    static public final String SFO_COPYVERIFY = "COPIED/VERIFIED";
+    static public final String SFO_VERFIED = "VERIFIED";
+    static public final String SFO_RECOVERED = "RECOVERED";
+    static public final String SFO_DONE = "DONE";
 
     public String sName;
     public String sSourcePath;
     public String sDestinationPath;
-    public int intSize;
+    public long fileSize;
     public String sOperation; //
     public String Status;
 
@@ -104,34 +106,38 @@ public class SyncFileOperation extends TreeItem<String> {
     public String getSName() { return sName; }
     public String getSSourcePath () { return sSourcePath; }
     public String getSDestinationPath () { return sDestinationPath; }
-    public int getIntSize() { return intSize; }
+    public long getFileSize() { return fileSize; }
     public String getSOperation() { return sOperation; }
     public String getStatus() { return Status;}
 
-    public SyncFileOperation(Path file) {
+    public SyncFileOperation(Path file, String sSourceBase, String sDestPath ) {
 
         //SetUpImages();
         //super(file.toString());
         this.fullPath = file.toString();
         sSourcePath = fullPath;
-        sName = String.valueOf(file.getFileName());
-        //printSysOut("SyncFileOperation - :"+ sName+ ":"+sSourcePath);
 
-        sDestinationPath = "None here yet";
+        String sSourceTail = sSourcePath.substring( sSourceBase.length() );
+
+        sDestinationPath = sDestPath + sSourceTail;
+
+
+        sName = String.valueOf(file.getFileName());
+
+        //printSysOut(String.format("SynchFileOperation : %s -> %s ", sSourcePath, sDestinationPath));
+        //printSysOut("SyncFileOperation - :"+ sName+ ":"+sSourcePath);
 
         //test if this is a directory and set the icon
 
         if (Files.isDirectory(file)) {
             this.isDirectory = true;
-            intSize = 0;
+            fileSize = 0;
             if ( bImagesGood ) {
                 //super.setGraphic(new ImageView(folderExpandImage));
                 printSysOut("SyncFileOperation - folder Graphic set");
             }
         } else {
             this.isDirectory = false;
-            File aFUckingFile = new File(file.toString());
-            intSize = (int)aFUckingFile.length();
             if ( bImagesGood ) {
                 //super.setGraphic(new ImageView(fileImage));
                 printSysOut("SyncFileOperation - file Graphic set");
@@ -139,10 +145,33 @@ public class SyncFileOperation extends TreeItem<String> {
 
         }
 
-        sOperation = SFO_COPY;
-        Status = SFO_PEND;
+        /*
+            If the destination file exists, and has a modification date the same or later than
+            the source file, then leave it alone. sOperation == SFO_NONE
+            Later we will fix with Verify stuff
+         */
+        fileSize = 0;
+        File fDestFile = new File( sDestinationPath);
+        File fSource = new File (file.toString() );
+        if ( fDestFile.isFile() && fDestFile.exists() ) {
+            long srcLastModified = fSource.lastModified();
+            long dstLastModified = fDestFile.lastModified();
+            if ( dstLastModified >= srcLastModified ) {
+                sOperation = SFO_NONE;
+                Status = SFO_DONE;
+            } else {
+                sOperation = SFO_COPY;
+                Status = SFO_PEND;
+            }
 
+        } else {
+            sOperation = SFO_COPY;
+            Status = SFO_PEND;
+        }
 
+    if (sOperation.equals(SFO_COPY)) {
+        fileSize = fSource.length();
+    }
 
     } // end of constructor
 } // end of SyncFileOperation class
