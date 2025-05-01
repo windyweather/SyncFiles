@@ -35,10 +35,10 @@ public class SyncFileOperation extends TreeItem<String> {
     /*
         Operation constants
      */
-    static final String SFO_COPY = "COPY";
-    static final String SFO_COPY_VERIFY = "COPY/VERIFY";
-    static final String SFO_VERIFY_NOCOPY = "VERIFY ONLY";
-    static final String SFO_NONE = "NONE";
+    static public final String SFO_COPY = "COPY";
+    static public final String SFO_COPY_VERIFY = "COPY/VERIFY";
+    static public final String SFO_VERIFY_NOCOPY = "VERIFY ONLY";
+    static public final String SFO_NONE = "NONE";
     /*
         Status Constants
      */
@@ -153,6 +153,7 @@ public class SyncFileOperation extends TreeItem<String> {
         fileSize = 0;
         File fDestFile = new File( sDestinationPath);
         File fSource = new File (file.toString() );
+        //printSysOut(String.format("SyncFileOperation - %s -> %s", fSource.getAbsoluteFile().toString(), fDestFile.getAbsoluteFile().toString() ));
         if ( fDestFile.isFile() && fDestFile.exists() ) {
             long srcLastModified = fSource.lastModified();
             long dstLastModified = fDestFile.lastModified();
@@ -169,9 +170,9 @@ public class SyncFileOperation extends TreeItem<String> {
             Status = SFO_PEND;
         }
 
-    if (sOperation.equals(SFO_COPY)) {
+    if (sOperation.equals(SFO_COPY) && !this.isDirectory ) {
         fileSize = fSource.length();
     }
-
+    //printSysOut("SyncFileOperation "+sOperation+" "+Status);
     } // end of constructor
 } // end of SyncFileOperation class

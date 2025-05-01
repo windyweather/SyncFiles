@@ -433,7 +433,7 @@ public class SyncFilesController {
             Property Value Factories for Tree Columns
          */
         tcSourcePath.setCellValueFactory( new TreeItemPropertyValueFactory<>("SSourcePath"));
-        tcFileSize.setCellValueFactory( new TreeItemPropertyValueFactory<>("IntSize"));
+        tcFileSize.setCellValueFactory( new TreeItemPropertyValueFactory<>("FileSize"));
         tcActionPending.setCellValueFactory( new TreeItemPropertyValueFactory<>( "SOperation"));
         tcStatus.setCellValueFactory( new TreeItemPropertyValueFactory<>("Status"));
 
@@ -1016,16 +1016,25 @@ public class SyncFilesController {
             Path pDeeperPath = new File(sDeeperPath).toPath();
 
             //printSysOut("GetTreeChildren Add File : " + sDeeperPath);
-            SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath, sSourcePath, sDestinationPath);
-            TreeItem<SyncFileOperation> deepNode = new TreeItem<>(sfoDeeper);
-            if ( bImagesGood ) {
-                deepNode.setGraphic(new ImageView(fileImage));
-                printSysOut("PathSomeToSome - file Graphic set");
-            }
-            longTotalBytes += sfoDeeper.getFileSize();
-            intOperations++;
 
-            treeNode.getChildren().add(deepNode);
+            /*
+                Create the object, and look at the files. If we have an operation, that's PENDING
+                then put it in the tree, else not. Only files we are willing to copy [or later verify]
+                will go in the tree.
+             */
+            SyncFileOperation sfoDeeper = new SyncFileOperation(pDeeperPath, sSourcePath, sDestinationPath);
+
+            //printSysOut("GetTreeChildren - sfoDeeper status "+sfoDeeper.getStatus());
+            if ( sfoDeeper.getStatus().equals( SFO_PEND) ) {
+                longTotalBytes += sfoDeeper.getFileSize();
+                intOperations++;
+                TreeItem<SyncFileOperation> deepNode = new TreeItem<>(sfoDeeper);
+                if ( bImagesGood ) {
+                    deepNode.setGraphic(new ImageView(fileImage));
+                    printSysOut("PathSomeToSome - file Graphic set");
+                }
+                treeNode.getChildren().add(deepNode);
+            }
 
         }
         /*
@@ -1038,7 +1047,7 @@ public class SyncFilesController {
             return;
         }
         /*
-            Scan all the dirs
+            Scan all the dirs, and they all go in the tree.
          */
         String[] sSourceDirs = scanner.getIncludedDirectories();
         for (String sSourceDir : sSourceDirs) {
